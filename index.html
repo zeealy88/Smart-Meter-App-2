@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smart Meter Helper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .box {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 12px;
+      width: 100%;
+      background: black;
+      color: white;
+      border: none;
+      border-radius: 8px;
+    }
+    h2 {
+      margin-top: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>Enter Meter Readings</h2>
+
+  Previous Reading:
+  <input id="prev" type="number" placeholder="Enter previous">
+
+  Current Reading:
+  <input id="curr" type="number" placeholder="Enter current">
+
+  <button onclick="calculate()">Calculate</button>
+</div>
+
+<div class="box">
+  <h2>Result</h2>
+
+  Usage: <b id="usage">0</b> kWh<br><br>
+  Estimated Bill: <b id="bill">$0</b>
+</div>
+
+<script>
+function calculate() {
+  let prev = parseFloat(document.getElementById("prev").value);
+  let curr = parseFloat(document.getElementById("curr").value);
+
+  if (!prev || !curr) {
+    alert("Enter both readings");
+    return;
+  }
+
+  let usage = curr - prev;
+
+  // Your real rates
+  let energy = 0.07253;
+  let tdsp = 0.0665;
+  let puca = 0.00023;
+
+  let totalRate = energy + tdsp + puca;
+
+  let bill = usage * totalRate;
+
+  document.getElementById("usage").innerText = usage.toFixed(2);
+  document.getElementById("bill").innerText = "$" + bill.toFixed(2);
+}
+</script>
+
+</body>
+</html>
