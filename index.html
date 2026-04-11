@@ -8,7 +8,7 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; margin: 0; }
     .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 10px; }
-    input { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; }
+    input { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
     button { padding: 12px; width: 100%; background: black; color: white; border: none; border-radius: 8px; cursor: pointer; }
     .entry { padding: 10px 0; border-bottom: 1px solid #ddd; }
   </style>
@@ -17,11 +17,22 @@
 
   <div class="card">
     <h2>Enter Meter Reading</h2>
+
+    <label>Previous Reading</label>
     <input id="prev" type="number" step="0.001" placeholder="Previous Reading" />
+
+    <label>Current Reading</label>
     <input id="curr" type="number" step="0.001" placeholder="Current Reading" />
+
+    <label>Meter Read Date</label>
     <input id="readDate" type="date" />
+
+    <label>Bill Period Start</label>
     <input id="billFrom" type="date" />
+
+    <label>Bill Period End</label>
     <input id="billTo" type="date" />
+
     <button onclick="saveData()">Save</button>
   </div>
 
@@ -39,7 +50,7 @@
   <script>
     const supabase = window.supabase.createClient(
       "https://zdhvnoiyayjupgwnjrbkg.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaHZub2lheWp1cGd3bmpyYmtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MDk3MjIsImV4cCI6MjA5MTQ4NTcyMn0.9iBjicqdI_SzaZkUtFjCVYJ8wPEI2eacEiAnuqcgkqE"
+      "PASTE_YOUR_ANON_KEY_HERE"
     );
 
     const rate = 0.13926;
