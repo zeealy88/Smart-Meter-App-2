@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smart Meter Helper</title>
+<title>Smart Meter App</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body { font-family: Arial; background:#f5f5f5; margin:0; padding:15px;}
-.card { background:#fff; padding:15px; border-radius:12px; margin-bottom:15px;}
-input { width:100%; padding:12px; margin-top:5px; margin-bottom:10px;}
+body { font-family: Arial; padding:20px; background:#f5f5f5;}
+.card { background:white; padding:15px; margin-bottom:15px; border-radius:10px;}
+input { width:100%; padding:10px; margin:5px 0;}
 button { padding:12px; width:100%; background:black; color:white; border:none; border-radius:8px;}
-.entry { border:1px solid #ddd; padding:10px; margin-top:10px; border-radius:10px;}
 </style>
 </head>
 
@@ -21,102 +20,82 @@ button { padding:12px; width:100%; background:black; color:white; border:none; b
 <div class="card">
 <h2>Enter Meter Reading</h2>
 
-Previous Reading:
-<input id="prev" type="number">
-
-Current Reading:
-<input id="curr" type="number">
-
-Meter Read Date:
+<input id="prev" placeholder="Previous Reading">
+<input id="curr" placeholder="Current Reading">
 <input id="readDate" type="date">
-
-Bill Period Start:
 <input id="billFrom" type="date">
-
-Bill Period End:
 <input id="billTo" type="date">
 
-<button onclick="calculateAndSave()">Save</button>
+<button onclick="saveData()">Save</button>
 </div>
 
 <div class="card">
-<h2>Result</h2>
-Usage: <b id="usage">0</b> kWh<br><br>
-Estimated Bill: <b id="bill">$0</b>
+<h3>Result</h3>
+Usage: <span id="usage">0</span><br>
+Bill: <span id="bill">$0</span>
 </div>
 
 <div class="card">
-<h2>History</h2>
+<h3>History</h3>
 <div id="history"></div>
 </div>
 
 <script>
 
-const SUPABASE_URL = "https://zdhvnoiayjupgwnjrbkg.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaHZub2lheWp1cGd3bmpyYmtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MDk3MjIsImV4cCI6MjA5MTQ4NTcyMn0.9iBjicqdI_SzaZkUtFjCVYJ8wPEI2eacEiAnuqcgkqE";
+const supabase = window.supabase.createClient(
+"https://zdhvnoiyayjupgwnjrbkg.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaHZub2lheWp1cGd3bmpyYmtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MDk3MjIsImV4cCI6MjA5MTQ4NTcyMn0.9iBjicqdI_SzaZkUtFjCVYJ8wPEI2eacEiAnuqcgkqE"
+);
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const rate = 0.13926;
 
-// your rates
-const energy = 0.07253;
-const tdsp = 0.0665;
-const puca = 0.00023;
-
-async function calculateAndSave(){
+async function saveData(){
 
 let prev = parseFloat(document.getElementById("prev").value);
 let curr = parseFloat(document.getElementById("curr").value);
 
-let readDate = document.getElementById("readDate").value;
-let billFrom = document.getElementById("billFrom").value;
-let billTo = document.getElementById("billTo").value;
-
-if(!prev || !curr){
+if(isNaN(prev) || isNaN(curr)){
 alert("Enter readings");
 return;
 }
 
 let usage = curr - prev;
-let bill = usage * (energy + tdsp + puca);
+let bill = usage * rate;
 
 document.getElementById("usage").innerText = usage.toFixed(2);
-document.getElementById("bill").innerText = "$" + bill.toFixed(2);
+document.getElementById("bill").innerText = "$"+bill.toFixed(2);
 
-// save to supabase
-await supabase.from("meter_history").insert({
+const { error } = await supabase.from("meter_history").insert([{
 previous_reading: prev,
 current_reading: curr,
 usage: usage,
 estimated_bill: bill,
-read_date: readDate,
-bill_from: billFrom,
-bill_to: billTo
-});
+read_date: document.getElementById("readDate").value,
+bill_from: document.getElementById("billFrom").value,
+bill_to: document.getElementById("billTo").value
+}]);
 
-loadHistory();
-
-// auto update prev
-document.getElementById("prev").value = curr;
-document.getElementById("curr").value = "";
+if(error){
+alert("Error: "+error.message);
+return;
 }
 
-async function loadHistory(){
+loadData();
+}
 
-let { data } = await supabase
-.from("meter_history")
-.select("*")
-.order("created_at", { ascending:false });
+async function loadData(){
 
-let html = "";
+let { data } = await supabase.from("meter_history").select("*").order("id",{ascending:false});
 
-data.forEach(item => {
-html += `
-<div class="entry">
-<b>${new Date(item.created_at).toLocaleString()}</b><br>
-Usage: ${item.usage.toFixed(2)} kWh<br>
+let html="";
+
+data.forEach(item=>{
+html+=`
+<div>
+Usage: ${item.usage.toFixed(2)} |
 Bill: $${item.estimated_bill.toFixed(2)}<br>
-Read Date: ${item.read_date || "-"}<br>
-Bill Period: ${item.bill_from || "-"} → ${item.bill_to || "-"}
+${item.read_date || "-"} (${item.bill_from || "-"} → ${item.bill_to || "-"})
+<hr>
 </div>
 `;
 });
@@ -124,7 +103,7 @@ Bill Period: ${item.bill_from || "-"} → ${item.bill_to || "-"}
 document.getElementById("history").innerHTML = html || "No data";
 }
 
-loadHistory();
+loadData();
 
 </script>
 
