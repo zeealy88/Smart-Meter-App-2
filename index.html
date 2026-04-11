@@ -1,86 +1,456 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart Meter Helper</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: Arial;
-      padding: 20px;
-      background: #f5f5f5;
+    :root{
+      --bg:#f4f6f8;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --primary:#111827;
+      --primary-2:#1f2937;
+      --accent:#16a34a;
+      --danger:#dc2626;
+      --shadow:0 10px 30px rgba(0,0,0,.08);
+      --radius:18px;
     }
-    .box {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
     }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      margin-bottom: 10px;
+
+    .wrap{
+      max-width:760px;
+      margin:0 auto;
+      padding:20px 14px 40px;
     }
-    button {
-      padding: 12px;
-      width: 100%;
-      background: black;
-      color: white;
-      border: none;
-      border-radius: 8px;
+
+    .header{
+      margin-bottom:16px;
     }
-    h2 {
-      margin-top: 0;
+
+    .title{
+      font-size:28px;
+      font-weight:700;
+      margin:0 0 6px;
+    }
+
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+      margin-bottom:16px;
+    }
+
+    .section-title{
+      margin:0 0 14px;
+      font-size:18px;
+      font-weight:700;
+    }
+
+    .grid{
+      display:grid;
+      gap:12px;
+    }
+
+    .grid-2{
+      grid-template-columns:1fr 1fr;
+    }
+
+    label{
+      display:block;
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:6px;
+      color:var(--primary-2);
+    }
+
+    input{
+      width:100%;
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      font-size:16px;
+      outline:none;
+      background:#fff;
+    }
+
+    input:focus{
+      border-color:#9ca3af;
+    }
+
+    .btn-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    button{
+      border:none;
+      border-radius:12px;
+      padding:14px;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .btn-primary{
+      background:var(--primary);
+      color:#fff;
+    }
+
+    .btn-secondary{
+      background:#eef2f7;
+      color:var(--text);
+    }
+
+    .btn-danger{
+      background:var(--danger);
+      color:#fff;
+      width:100%;
+      margin-top:10px;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .stat{
+      background:#f9fafb;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .stat-label{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:8px;
+    }
+
+    .stat-value{
+      font-size:24px;
+      font-weight:700;
+    }
+
+    .rate-note{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .history-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+
+    .pill{
+      background:#f3f4f6;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:13px;
+      color:var(--primary-2);
+      font-weight:700;
+    }
+
+    .empty{
+      color:var(--muted);
+      font-size:14px;
+      text-align:center;
+      padding:18px 8px;
+      border:1px dashed var(--line);
+      border-radius:14px;
+      background:#fafafa;
+    }
+
+    .entry{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      margin-top:10px;
+      background:#fff;
+    }
+
+    .entry-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .entry-date{
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .mini-btn{
+      background:#fff1f2;
+      color:var(--danger);
+      padding:8px 10px;
+      border-radius:10px;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .entry-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .entry-box{
+      background:#f9fafb;
+      border-radius:12px;
+      padding:10px;
+      border:1px solid var(--line);
+    }
+
+    .entry-label{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+
+    .entry-value{
+      font-size:15px;
+      font-weight:700;
+    }
+
+    @media (max-width: 640px){
+      .grid-2,
+      .stats,
+      .entry-grid,
+      .btn-row{
+        grid-template-columns:1fr;
+      }
+
+      .title{
+        font-size:24px;
+      }
     }
   </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <div class="header">
+      <h1 class="title">Smart Meter Helper</h1>
+      <p class="subtitle">Track meter readings, estimate bills, and keep history records.</p>
+    </div>
 
-<div class="box">
-  <h2>Enter Meter Readings</h2>
+    <div class="card">
+      <h2 class="section-title">Enter Meter Reading</h2>
 
-  Previous Reading:
-  <input id="prev" type="number" placeholder="Enter previous">
+      <div class="grid grid-2">
+        <div>
+          <label for="prev">Previous Reading</label>
+          <input id="prev" type="number" step="0.001" placeholder="Enter previous reading" />
+        </div>
+        <div>
+          <label for="curr">Current Reading</label>
+          <input id="curr" type="number" step="0.001" placeholder="Enter current reading" />
+        </div>
+      </div>
 
-  Current Reading:
-  <input id="curr" type="number" placeholder="Enter current">
+      <div class="grid grid-2" style="margin-top:12px;">
+        <div>
+          <label for="energyRate">Energy Rate</label>
+          <input id="energyRate" type="number" step="0.00001" value="0.07253" />
+        </div>
+        <div>
+          <label for="tdspRate">TDSP Rate</label>
+          <input id="tdspRate" type="number" step="0.00001" value="0.06650" />
+        </div>
+      </div>
 
-  <button onclick="calculate()">Calculate</button>
-</div>
+      <div style="margin-top:12px;">
+        <label for="pucaRate">PUCA Rate</label>
+        <input id="pucaRate" type="number" step="0.00001" value="0.00023" />
+      </div>
 
-<div class="box">
-  <h2>Result</h2>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="calculateAndSave()">Calculate & Save</button>
+        <button class="btn-secondary" onclick="clearInputs()">Clear Inputs</button>
+      </div>
 
-  Usage: <b id="usage">0</b> kWh<br><br>
-  Estimated Bill: <b id="bill">$0</b>
-</div>
+      <div class="rate-note">
+        Current default rates are based on your earlier bill values.
+      </div>
+    </div>
 
-<script>
-function calculate() {
-  let prev = parseFloat(document.getElementById("prev").value);
-  let curr = parseFloat(document.getElementById("curr").value);
+    <div class="card">
+      <h2 class="section-title">Current Result</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Usage</div>
+          <div class="stat-value" id="usage">0.00 kWh</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Estimated Bill</div>
+          <div class="stat-value" id="bill">$0.00</div>
+        </div>
+      </div>
+    </div>
 
-  if (!prev || !curr) {
-    alert("Enter both readings");
-    return;
-  }
+    <div class="card">
+      <div class="history-top">
+        <h2 class="section-title" style="margin:0;">History</h2>
+        <div class="pill" id="totalUsage">Total Usage: 0.00 kWh</div>
+      </div>
 
-  let usage = curr - prev;
+      <div id="historyList" class="empty">No records saved yet.</div>
 
-  // Your real rates
-  let energy = 0.07253;
-  let tdsp = 0.0665;
-  let puca = 0.00023;
+      <button class="btn-danger" onclick="clearHistory()">Clear All History</button>
+    </div>
+  </div>
 
-  let totalRate = energy + tdsp + puca;
+  <script>
+    const STORAGE_KEY = "smart_meter_history_v1";
 
-  let bill = usage * totalRate;
+    function getHistory() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    }
 
-  document.getElementById("usage").innerText = usage.toFixed(2);
-  document.getElementById("bill").innerText = "$" + bill.toFixed(2);
-}
-</script>
+    function saveHistory(history) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    }
 
+    function formatMoney(value) {
+      return "$" + Number(value).toFixed(2);
+    }
+
+    function formatNum(value) {
+      return Number(value).toFixed(2);
+    }
+
+    function clearInputs() {
+      document.getElementById("prev").value = "";
+      document.getElementById("curr").value = "";
+    }
+
+    function calculateAndSave() {
+      const prev = parseFloat(document.getElementById("prev").value);
+      const curr = parseFloat(document.getElementById("curr").value);
+      const energyRate = parseFloat(document.getElementById("energyRate").value) || 0;
+      const tdspRate = parseFloat(document.getElementById("tdspRate").value) || 0;
+      const pucaRate = parseFloat(document.getElementById("pucaRate").value) || 0;
+
+      if (isNaN(prev) || isNaN(curr)) {
+        alert("Please enter both previous and current readings.");
+        return;
+      }
+
+      if (curr <= prev) {
+        alert("Current reading must be greater than previous reading.");
+        return;
+      }
+
+      const usage = curr - prev;
+      const totalRate = energyRate + tdspRate + pucaRate;
+      const bill = usage * totalRate;
+
+      document.getElementById("usage").innerText = formatNum(usage) + " kWh";
+      document.getElementById("bill").innerText = formatMoney(bill);
+
+      const record = {
+        id: Date.now(),
+        date: new Date().toLocaleString(),
+        previous: prev,
+        current: curr,
+        usage: usage,
+        bill: bill
+      };
+
+      const history = getHistory();
+      history.unshift(record);
+      saveHistory(history);
+      renderHistory();
+
+      document.getElementById("prev").value = curr;
+      document.getElementById("curr").value = "";
+    }
+
+    function deleteRecord(id) {
+      const history = getHistory().filter(item => item.id !== id);
+      saveHistory(history);
+      renderHistory();
+    }
+
+    function clearHistory() {
+      if (!confirm("Clear all saved history?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      renderHistory();
+      document.getElementById("usage").innerText = "0.00 kWh";
+      document.getElementById("bill").innerText = "$0.00";
+    }
+
+    function renderHistory() {
+      const history = getHistory();
+      const historyList = document.getElementById("historyList");
+      const totalUsage = history.reduce((sum, item) => sum + item.usage, 0);
+
+      document.getElementById("totalUsage").innerText = "Total Usage: " + formatNum(totalUsage) + " kWh";
+
+      if (history.length === 0) {
+        historyList.className = "empty";
+        historyList.innerHTML = "No records saved yet.";
+        return;
+      }
+
+      historyList.className = "";
+      historyList.innerHTML = history.map(item => `
+        <div class="entry">
+          <div class="entry-top">
+            <div class="entry-date">${item.date}</div>
+            <button class="mini-btn" onclick="deleteRecord(${item.id})">Delete</button>
+          </div>
+
+          <div class="entry-grid">
+            <div class="entry-box">
+              <div class="entry-label">Previous</div>
+              <div class="entry-value">${formatNum(item.previous)}</div>
+            </div>
+            <div class="entry-box">
+              <div class="entry-label">Current</div>
+              <div class="entry-value">${formatNum(item.current)}</div>
+            </div>
+            <div class="entry-box">
+              <div class="entry-label">Usage</div>
+              <div class="entry-value">${formatNum(item.usage)} kWh</div>
+            </div>
+            <div class="entry-box">
+              <div class="entry-label">Estimated Bill</div>
+              <div class="entry-value">${formatMoney(item.bill)}</div>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    renderHistory();
+  </script>
 </body>
 </html>
