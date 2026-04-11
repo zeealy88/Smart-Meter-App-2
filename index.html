@@ -6,11 +6,50 @@
   <title>Smart Meter App</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; margin: 0; }
-    .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 10px; }
-    input { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
-    button { padding: 12px; width: 100%; background: black; color: white; border: none; border-radius: 8px; cursor: pointer; }
-    .entry { padding: 10px 0; border-bottom: 1px solid #ddd; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+      margin: 0;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      padding: 12px;
+      width: 100%;
+      background: black;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+    .entry {
+      padding: 10px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    .status {
+      margin-top: 10px;
+      color: #555;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -18,22 +57,23 @@
   <div class="card">
     <h2>Enter Meter Reading</h2>
 
-    <label>Previous Reading</label>
+    <label for="prev">Previous Reading</label>
     <input id="prev" type="number" step="0.001" placeholder="Previous Reading" />
 
-    <label>Current Reading</label>
+    <label for="curr">Current Reading</label>
     <input id="curr" type="number" step="0.001" placeholder="Current Reading" />
 
-    <label>Meter Read Date</label>
+    <label for="readDate">Meter Read Date</label>
     <input id="readDate" type="date" />
 
-    <label>Bill Period Start</label>
+    <label for="billFrom">Bill Period Start</label>
     <input id="billFrom" type="date" />
 
-    <label>Bill Period End</label>
+    <label for="billTo">Bill Period End</label>
     <input id="billTo" type="date" />
 
-    <button onclick="saveData()">Save</button>
+    <button id="saveBtn">Save</button>
+    <div id="status" class="status">Ready.</div>
   </div>
 
   <div class="card">
@@ -48,25 +88,28 @@
   </div>
 
   <script>
-    const supabase = window.supabase.createClient(
-      "https://zdhvnoiyayjupgwnjrbkg.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaHZub2lheWp1cGd3bmpyYmtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MDk3MjIsImV4cCI6MjA5MTQ4NTcyMn0.9iBjicqdI_SzaZkUtFjCVYJ8wPEI2eacEiAnuqcgkqE"
-    );
-
+    const SUPABASE_URL = "https://zdhvnoiyayjupgwnjrbkg.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaHZub2lheWp1cGd3bmpyYmtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MDk3MjIsImV4cCI6MjA5MTQ4NTcyMn0.9iBjicqdI_SzaZkUtFjCVYJ8wPEI2eacEiAnuqcgkqE";
     const rate = 0.13926;
 
-    async function saveData() {
+    let supabase = null;
+
+    function setStatus(message) {
+      document.getElementById("status").innerText = message;
+    }
+
+    function calculateOnly() {
       const prev = parseFloat(document.getElementById("prev").value);
       const curr = parseFloat(document.getElementById("curr").value);
 
       if (isNaN(prev) || isNaN(curr)) {
         alert("Enter both readings");
-        return;
+        return null;
       }
 
       if (curr <= prev) {
         alert("Current reading must be greater than previous reading");
-        return;
+        return null;
       }
 
       const usage = curr - prev;
@@ -75,31 +118,71 @@
       document.getElementById("usage").innerText = usage.toFixed(2);
       document.getElementById("bill").innerText = "$" + bill.toFixed(2);
 
-      const { error } = await supabase.from("meter_history").insert([{
+      return {
         previous_reading: prev,
         current_reading: curr,
-        usage: usage,
+        usage,
         estimated_bill: bill,
         read_date: document.getElementById("readDate").value || null,
         bill_from: document.getElementById("billFrom").value || null,
         bill_to: document.getElementById("billTo").value || null
-      }]);
+      };
+    }
 
-      if (error) {
-        alert("Save failed: " + error.message);
+    async function initSupabase() {
+      try {
+        if (!window.supabase || !window.supabase.createClient) {
+          setStatus("Supabase library failed to load.");
+          return false;
+        }
+
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        setStatus("Supabase ready.");
+        return true;
+      } catch (e) {
+        console.error("Supabase init error:", e);
+        setStatus("Supabase init failed.");
+        return false;
+      }
+    }
+
+    async function saveData() {
+      const payload = calculateOnly();
+      if (!payload) return;
+
+      if (!supabase) {
+        setStatus("Calculated, but Supabase is not connected.");
         return;
       }
 
-      loadData();
+      setStatus("Saving...");
+
+      const { error } = await supabase.from("meter_history").insert([payload]);
+
+      if (error) {
+        console.error("Insert error:", error);
+        alert("Save failed: " + error.message);
+        setStatus("Save failed.");
+        return;
+      }
+
+      setStatus("Saved.");
+      await loadData();
     }
 
     async function loadData() {
+      if (!supabase) {
+        document.getElementById("history").innerText = "Supabase not connected.";
+        return;
+      }
+
       const { data, error } = await supabase
         .from("meter_history")
         .select("*")
         .order("id", { ascending: false });
 
       if (error) {
+        console.error("Load error:", error);
         document.getElementById("history").innerText = "Load failed: " + error.message;
         return;
       }
@@ -119,7 +202,14 @@
       document.getElementById("history").innerHTML = html || "No data";
     }
 
-    loadData();
+    document.getElementById("saveBtn").addEventListener("click", saveData);
+
+    (async function () {
+      const ok = await initSupabase();
+      if (ok) {
+        await loadData();
+      }
+    })();
   </script>
 </body>
 </html>
