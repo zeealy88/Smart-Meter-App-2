@@ -77,15 +77,16 @@
     <div id="history">Loading...</div>
   </div>
 
-  <script>
-    const rate = 0.13926;
+ <script>
+  const rate = 0.13926;
 
-    const supabase = window.supabase.createClient(
-      "https://zdhvnoiyayjupgwnjrbkg.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaHZub2lheWp1cGd3bmpyYmtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MDk3MjIsImV4cCI6MjA5MTQ4NTcyMn0.9iBjicqdI_SzaZkUtFjCVYJ8wPEI2eacEiAnuqcgkqE"
-    );
+  const supabase = window.supabase.createClient(
+    "https://zdhvnoiyayjupgwnjrbkg.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaHZub2lheWp1cGd3bmpyYmtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MDk3MjIsImV4cCI6MjA5MTQ4NTcyMn0.9iBjicqdI_SzaZkUtFjCVYJ8wPEI2eacEiAnuqcgkqE"
+  );
 
-    async function saveData() {
+  async function saveData() {
+    try {
       const prev = parseFloat(document.getElementById("prev").value);
       const curr = parseFloat(document.getElementById("curr").value);
 
@@ -106,38 +107,51 @@
       document.getElementById("bill").innerText = "$" + bill.toFixed(2);
       document.getElementById("status").innerText = "Saving...";
 
-      const { error } = await supabase.from("meter_history").insert([
-        {
-          previous_reading: prev,
-          current_reading: curr,
-          usage: usage,
-          estimated_bill: bill
-        }
-      ]);
+      const payload = {
+        previous_reading: prev,
+        current_reading: curr,
+        usage: usage,
+        estimated_bill: bill
+      };
+
+      console.log("Saving payload:", payload);
+
+      const { data, error } = await supabase
+        .from("meter_history")
+        .insert([payload])
+        .select();
+
+      console.log("Insert result:", { data, error });
 
       if (error) {
-        console.error(error);
         alert("Save failed: " + error.message);
-        document.getElementById("status").innerText = "Save failed.";
+        document.getElementById("status").innerText = "Save failed: " + error.message;
         return;
       }
 
-      document.getElementById("status").innerText = "Saved successfully.";
-      document.getElementById("curr").value = "";
-      document.getElementById("prev").value = curr;
-
+      document.getElementById("status").innerText = "Saved successfully";
       await loadHistory();
+    } catch (e) {
+      console.error(e);
+      alert("Unexpected error: " + e.message);
+      document.getElementById("status").innerText = "Unexpected error";
     }
+  }
 
-    async function loadHistory() {
+  async function loadHistory() {
+    try {
+      document.getElementById("status").innerText = "Loading history...";
+
       const { data, error } = await supabase
         .from("meter_history")
         .select("*")
         .order("id", { ascending: false });
 
+      console.log("Load result:", { data, error });
+
       if (error) {
-        console.error(error);
         document.getElementById("history").innerText = "Load error: " + error.message;
+        document.getElementById("status").innerText = "Load failed";
         return;
       }
 
@@ -152,12 +166,18 @@
       });
 
       document.getElementById("history").innerHTML = html || "No data";
+      document.getElementById("status").innerText = "Ready.";
+    } catch (e) {
+      console.error(e);
+      document.getElementById("history").innerText = "Unexpected load error";
+      document.getElementById("status").innerText = "Load failed";
     }
+  }
 
-    document.getElementById("saveBtn").addEventListener("click", saveData);
+  document.querySelector("button").addEventListener("click", saveData);
 
-    loadHistory();
-  </script>
+  loadHistory();
+</script>
 
 </body>
 </html>
