@@ -4,72 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart Meter App</title>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f5f5f5;
-      margin: 0;
-    }
-
-    .card {
-      background: white;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      box-sizing: border-box;
-    }
-
-    button {
-      padding: 12px;
-      width: 100%;
-      background: black;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .entry {
-      padding: 10px 0;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .status {
-      margin-top: 8px;
-      font-size: 14px;
-      color: #555;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; margin: 0; }
+    .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 10px; }
+    input { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; }
+    button { padding: 12px; width: 100%; background: black; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    .entry { padding: 10px 0; border-bottom: 1px solid #ddd; }
   </style>
 </head>
-
 <body>
 
   <div class="card">
     <h2>Enter Meter Reading</h2>
-
     <input id="prev" type="number" step="0.001" placeholder="Previous Reading" />
     <input id="curr" type="number" step="0.001" placeholder="Current Reading" />
     <input id="readDate" type="date" />
     <input id="billFrom" type="date" />
     <input id="billTo" type="date" />
-
     <button onclick="saveData()">Save</button>
-    <div id="status" class="status"></div>
   </div>
 
   <div class="card">
     <h3>Result</h3>
-    Usage: <span id="usage">0</span><br />
+    Usage: <span id="usage">0</span><br>
     Bill: <span id="bill">$0</span>
   </div>
 
@@ -86,101 +44,71 @@
 
     const rate = 0.13926;
 
-    function setStatus(message) {
-      document.getElementById("status").innerText = message;
-    }
-
     async function saveData() {
-      try {
-        const prev = parseFloat(document.getElementById("prev").value);
-        const curr = parseFloat(document.getElementById("curr").value);
-        const readDate = document.getElementById("readDate").value || null;
-        const billFrom = document.getElementById("billFrom").value || null;
-        const billTo = document.getElementById("billTo").value || null;
+      const prev = parseFloat(document.getElementById("prev").value);
+      const curr = parseFloat(document.getElementById("curr").value);
 
-        if (isNaN(prev) || isNaN(curr)) {
-          alert("Enter both previous and current readings.");
-          return;
-        }
-
-        if (curr <= prev) {
-          alert("Current reading must be greater than previous reading.");
-          return;
-        }
-
-        const usage = curr - prev;
-        const bill = usage * rate;
-
-        document.getElementById("usage").innerText = usage.toFixed(2);
-        document.getElementById("bill").innerText = "$" + bill.toFixed(2);
-
-        setStatus("Saving...");
-
-        const { error } = await supabase.from("meter_history").insert([{
-          previous_reading: prev,
-          current_reading: curr,
-          usage: usage,
-          estimated_bill: bill,
-          read_date: readDate,
-          bill_from: billFrom,
-          bill_to: billTo
-        }]);
-
-        if (error) {
-          console.error("Insert error:", error);
-          alert("Save failed: " + error.message);
-          setStatus("Save failed");
-          return;
-        }
-
-        setStatus("Saved successfully");
-
-        document.getElementById("prev").value = curr;
-        document.getElementById("curr").value = "";
-
-        await loadData();
-      } catch (err) {
-        console.error("Unexpected error:", err);
-        alert("Unexpected error. Check console.");
-        setStatus("Unexpected error");
+      if (isNaN(prev) || isNaN(curr)) {
+        alert("Enter both readings");
+        return;
       }
+
+      if (curr <= prev) {
+        alert("Current reading must be greater than previous reading");
+        return;
+      }
+
+      const usage = curr - prev;
+      const bill = usage * rate;
+
+      document.getElementById("usage").innerText = usage.toFixed(2);
+      document.getElementById("bill").innerText = "$" + bill.toFixed(2);
+
+      const { error } = await supabase.from("meter_history").insert([{
+        previous_reading: prev,
+        current_reading: curr,
+        usage: usage,
+        estimated_bill: bill,
+        read_date: document.getElementById("readDate").value || null,
+        bill_from: document.getElementById("billFrom").value || null,
+        bill_to: document.getElementById("billTo").value || null
+      }]);
+
+      if (error) {
+        alert("Save failed: " + error.message);
+        return;
+      }
+
+      loadData();
     }
 
     async function loadData() {
-      try {
-        const { data, error } = await supabase
-          .from("meter_history")
-          .select("*")
-          .order("id", { ascending: false });
+      const { data, error } = await supabase
+        .from("meter_history")
+        .select("*")
+        .order("id", { ascending: false });
 
-        if (error) {
-          console.error("Load error:", error);
-          document.getElementById("history").innerHTML = "Error loading history: " + error.message;
-          return;
-        }
-
-        let html = "";
-
-        data.forEach(item => {
-          html += `
-            <div class="entry">
-              <strong>Usage:</strong> ${Number(item.usage).toFixed(2)} kWh |
-              <strong>Bill:</strong> $${Number(item.estimated_bill).toFixed(2)}<br>
-              <strong>Read Date:</strong> ${item.read_date || "-"}<br>
-              <strong>Bill Period:</strong> ${item.bill_from || "-"} → ${item.bill_to || "-"}
-            </div>
-          `;
-        });
-
-        document.getElementById("history").innerHTML = html || "No data";
-      } catch (err) {
-        console.error("Unexpected load error:", err);
-        document.getElementById("history").innerHTML = "Unexpected error loading history.";
+      if (error) {
+        document.getElementById("history").innerText = "Load failed: " + error.message;
+        return;
       }
+
+      let html = "";
+      data.forEach(item => {
+        html += `
+          <div class="entry">
+            Usage: ${Number(item.usage).toFixed(2)} kWh |
+            Bill: $${Number(item.estimated_bill).toFixed(2)}<br>
+            Read Date: ${item.read_date || "-"}<br>
+            Bill Period: ${item.bill_from || "-"} → ${item.bill_to || "-"}
+          </div>
+        `;
+      });
+
+      document.getElementById("history").innerHTML = html || "No data";
     }
 
     loadData();
   </script>
-
 </body>
 </html>
