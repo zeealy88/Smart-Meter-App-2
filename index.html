@@ -78,76 +78,74 @@
   </div>
 
   <script>
-    const rate = 0.13926;
+  const rate = 0.13926;
 
-    const supabase = window.supabase.createClient(
-      "https://zdhvnoiyayjupgwnjrbkg.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaHZub2lheWp1cGd3bmpyYmtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MDk3MjIsImV4cCI6MjA5MTQ4NTcyMn0.9iBjicqdI_SzaZkUtFjCVYJ8wPEI2eacEiAnuqcgkqE"
-    );
+  const supabase = window.supabase.createClient(
+    "https://zdhvnoiyayjupgwnjrbkg.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaHZub2lheWp1cGd3bmpyYmtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MDk3MjIsImV4cCI6MjA5MTQ4NTcyMn0.9iBjicqdI_SzaZkUtFjCVYJ8wPEI2eacEiAnuqcgkqE"
+  );
 
-    async function loadHistory() {
-      const { data, error } = await supabase
-        .from("meter_history")
-        .select("*")
-        .order("id", { ascending: false });
+  async function saveData() {
+    const prev = parseFloat(document.getElementById("prev").value);
+    const curr = parseFloat(document.getElementById("curr").value);
 
-      if (error) {
-        document.getElementById("history").innerText = "Load error: " + error.message;
-        return;
-      }
-
-      let html = "";
-      data.forEach(item => {
-        html += `
-          <div class="entry">
-            Usage: ${Number(item.usage).toFixed(2)} kWh |
-            Bill: $${Number(item.estimated_bill).toFixed(2)}
-          </div>
-        `;
-      });
-
-      document.getElementById("history").innerHTML = html || "No data";
+    if (isNaN(prev) || isNaN(curr)) {
+      alert("Enter both readings");
+      return;
     }
 
-    document.getElementById("calcBtn").addEventListener("click", async function () {
-      const prev = parseFloat(document.getElementById("prev").value);
-      const curr = parseFloat(document.getElementById("curr").value);
+    if (curr <= prev) {
+      alert("Current reading must be greater than previous reading");
+      return;
+    }
 
-      if (isNaN(prev) || isNaN(curr)) {
-        alert("Enter both readings");
-        return;
-      }
+    const usage = curr - prev;
+    const bill = usage * rate;
 
-      if (curr <= prev) {
-        alert("Current reading must be greater than previous reading");
-        return;
-      }
+    document.getElementById("usage").innerText = usage.toFixed(2);
+    document.getElementById("bill").innerText = "$" + bill.toFixed(2);
 
-      const usage = curr - prev;
-      const bill = usage * rate;
+    const { error } = await supabase.from("meter_history").insert([{
+      previous_reading: prev,
+      current_reading: curr,
+      usage: usage,
+      estimated_bill: bill
+    }]);
 
-      document.getElementById("usage").innerText = usage.toFixed(2);
-      document.getElementById("bill").innerText = "$" + bill.toFixed(2);
-      document.getElementById("status").innerText = "Calculation works. Saving...";
+    if (error) {
+      alert("Save failed: " + error.message);
+      return;
+    }
 
-      const { error } = await supabase.from("meter_history").insert([{
-        previous_reading: prev,
-        current_reading: curr,
-        usage: usage,
-        estimated_bill: bill
-      }]);
+    alert("Saved successfully");
+    loadHistory();
+  }
 
-      if (error) {
-        alert("Save failed: " + error.message);
-        document.getElementById("status").innerText = "Save failed.";
-        return;
-      }
+  async function loadHistory() {
+    const { data, error } = await supabase
+      .from("meter_history")
+      .select("*")
+      .order("id", { ascending: false });
 
-      document.getElementById("status").innerText = "Saved successfully.";
-      loadHistory();
+    if (error) {
+      document.getElementById("history").innerText = "Load error: " + error.message;
+      return;
+    }
+
+    let html = "";
+    data.forEach(item => {
+      html += `
+        <div class="entry">
+          Usage: ${Number(item.usage).toFixed(2)} kWh |
+          Bill: $${Number(item.estimated_bill).toFixed(2)}
+        </div>
+      `;
     });
 
-    loadHistory();
-  </script>
+    document.getElementById("history").innerHTML = html || "No data";
+  }
+
+  loadHistory();
+</script>
 </body>
 </html>
