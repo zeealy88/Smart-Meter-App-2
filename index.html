@@ -3,197 +3,391 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Meter App</title>
+  <title>Smart Meter</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f5f5f5;
-      margin: 0;
+      background: #f4f4f0;
+      color: #1a1a1a;
+      padding: 1.5rem 1rem 3rem;
     }
+
+    .app { max-width: 520px; margin: 0 auto; }
+
+    /* Top bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .topbar h1 { font-size: 20px; font-weight: 600; }
+    .pill {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      background: #E1F5EE;
+      color: #085041;
+      font-weight: 500;
+    }
+
+    /* Metric cards */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    .metric {
+      background: #fff;
+      border: 1px solid #e8e8e4;
+      border-radius: 12px;
+      padding: 14px 12px;
+    }
+    .metric-label { font-size: 11px; color: #888; margin-bottom: 5px; letter-spacing: .03em; }
+    .metric-val { font-size: 22px; font-weight: 600; color: #1a1a1a; line-height: 1; }
+    .metric-unit { font-size: 11px; color: #888; margin-top: 3px; }
+    .metric.green .metric-val { color: #0F6E56; }
+
+    /* Cards */
     .card {
-      background: white;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 10px;
+      background: #fff;
+      border: 1px solid #e8e8e4;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
     }
-    label {
-      display: block;
-      margin: 10px 0 4px;
-      font-weight: bold;
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #888;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
     }
-    input {
+
+    /* Chart */
+    .chart-wrap { position: relative; width: 100%; height: 140px; margin-bottom: .5rem; }
+
+    /* Form */
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .field { margin-top: 10px; }
+    .field label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+    .field input {
       width: 100%;
-      padding: 10px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      padding: 9px 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #fff;
+      color: #1a1a1a;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
     }
-    button {
+    .field input:focus {
+      border-color: #1D9E75;
+      box-shadow: 0 0 0 3px rgba(29,158,117,.1);
+    }
+
+    /* Divider */
+    .divider { height: 1px; background: #f0f0ec; margin: 1rem 0; }
+
+    /* Preview row */
+    .preview-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #888;
+    }
+    .preview-row strong { color: #1a1a1a; }
+    .preview-row .green { color: #0F6E56; }
+
+    /* Save button */
+    .save-btn {
       width: 100%;
-      padding: 12px;
-      margin-top: 12px;
-      background: black;
-      color: white;
+      padding: 11px;
+      background: #1D9E75;
+      color: #fff;
       border: none;
       border-radius: 8px;
-      cursor: pointer;
-    }
-    .entry {
-      padding: 10px 0;
-      border-bottom: 1px solid #ddd;
-    }
-    #status {
-      margin-top: 10px;
       font-size: 14px;
-      color: #444;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
     }
+    .save-btn:hover { opacity: .88; }
+    .save-btn:active { transform: scale(0.98); }
+    .save-btn:disabled { opacity: .45; cursor: default; }
+
+    /* Status */
+    .status {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+      margin-top: 10px;
+      min-height: 18px;
+    }
+
+    /* History */
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 0;
+      border-bottom: 1px solid #f0f0ec;
+    }
+    .history-item:last-child { border-bottom: none; }
+    .hi-kwh { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+    .hi-date { font-size: 12px; color: #888; margin-top: 2px; }
+    .hi-bill { font-size: 15px; font-weight: 600; color: #0F6E56; }
+    .trend-up { color: #0F6E56; font-size: 11px; margin-left: 4px; }
+    .trend-down { color: #c0392b; font-size: 11px; margin-left: 4px; }
+    .empty { font-size: 13px; color: #888; padding: 1rem 0; text-align: center; }
   </style>
 </head>
 <body>
+  <div class="app">
 
-  <div class="card">
-    <h2>Enter Meter Reading</h2>
+    <div class="topbar">
+      <h1>Smart meter</h1>
+      <span class="pill" id="conn-pill">connecting…</span>
+    </div>
 
-    <label for="prev">Previous Reading</label>
-    <input id="prev" type="number" step="0.001" placeholder="Previous Reading" />
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Last usage</div>
+        <div class="metric-val" id="m-usage">—</div>
+        <div class="metric-unit">kWh</div>
+      </div>
+      <div class="metric green">
+        <div class="metric-label">Last bill</div>
+        <div class="metric-val" id="m-bill">—</div>
+        <div class="metric-unit">estimated</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Total readings</div>
+        <div class="metric-val" id="m-count">—</div>
+        <div class="metric-unit">recorded</div>
+      </div>
+    </div>
 
-    <label for="curr">Current Reading</label>
-    <input id="curr" type="number" step="0.001" placeholder="Current Reading" />
+    <div class="card">
+      <div class="section-label">Usage over time</div>
+      <div class="chart-wrap">
+        <canvas id="usageChart" role="img" aria-label="Bar chart of recent meter usage in kWh">No chart data yet.</canvas>
+      </div>
+    </div>
 
-    <label for="readDate">Meter Read Date</label>
-    <input id="readDate" type="date" />
+    <div class="card">
+      <div class="section-label">New reading</div>
+      <div class="grid2">
+        <div class="field">
+          <label>Previous reading</label>
+          <input id="prev" type="number" step="0.001" placeholder="0.000" oninput="liveCalc()">
+        </div>
+        <div class="field">
+          <label>Current reading</label>
+          <input id="curr" type="number" step="0.001" placeholder="0.000" oninput="liveCalc()">
+        </div>
+      </div>
+      <div class="field">
+        <label>Meter read date</label>
+        <input id="readDate" type="date">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Bill period start</label>
+          <input id="billFrom" type="date">
+        </div>
+        <div class="field">
+          <label>Bill period end</label>
+          <input id="billTo" type="date">
+        </div>
+      </div>
 
-    <label for="billFrom">Bill Period Start</label>
-    <input id="billFrom" type="date" />
+      <div class="divider"></div>
 
-    <label for="billTo">Bill Period End</label>
-    <input id="billTo" type="date" />
+      <div class="preview-row">
+        <span>Preview</span>
+        <span>
+          Usage: <strong id="prev-usage">—</strong> kWh &nbsp;|&nbsp;
+          Est. bill: <strong class="green" id="prev-bill">—</strong>
+        </span>
+      </div>
 
-    <button id="saveBtn" type="button">Save</button>
-    <div id="status">Starting...</div>
-  </div>
+      <button class="save-btn" id="saveBtn" onclick="saveData()">Save reading</button>
+      <div class="status" id="status">Enter readings above</div>
+    </div>
 
-  <div class="card">
-    <h3>Result</h3>
-    Usage: <span id="usage">0</span><br />
-    Bill: <span id="bill">$0</span>
-  </div>
+    <div class="card">
+      <div class="section-label">History</div>
+      <div id="history-list"><div class="empty">Loading…</div></div>
+    </div>
 
-  <div class="card">
-    <h3>History</h3>
-    <div id="history">Loading...</div>
   </div>
 
   <script>
-  const SUPABASE_URL = "https://zdhvnoiayjupgwnjrbkg.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_ut0vWantp9acwz4Gov8PNA_TonMYYFW";
-  const RATE = 0.13926;
+    const SUPABASE_URL = "https://zdhvnoiayjupgwnjrbkg.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_ut0vWantp9acwz4Gov8PNA_TonMYYFW";
+    const RATE = 0.13926;
+    let sb = null, chartInst = null, allData = [];
 
-  let supabaseClient = null;
+    function setStatus(msg) { document.getElementById("status").textContent = msg; }
 
-  function setStatus(msg) {
-    document.getElementById("status").innerText = msg;
-    console.log(msg);
-  }
-
-  function calculate() {
-    const prev = parseFloat(document.getElementById("prev").value);
-    const curr = parseFloat(document.getElementById("curr").value);
-
-    if (isNaN(prev) || isNaN(curr)) {
-      throw new Error("Enter both readings.");
+    function setPill(txt, ok) {
+      const p = document.getElementById("conn-pill");
+      p.textContent = txt;
+      p.style.background = ok ? "#E1F5EE" : "#FAEEDA";
+      p.style.color = ok ? "#085041" : "#633806";
     }
 
-    if (curr <= prev) {
-      throw new Error("Current reading must be greater than previous reading.");
+    function liveCalc() {
+      const p = parseFloat(document.getElementById("prev").value);
+      const c = parseFloat(document.getElementById("curr").value);
+      if (!isNaN(p) && !isNaN(c) && c > p) {
+        const u = c - p;
+        document.getElementById("prev-usage").textContent = u.toFixed(2);
+        document.getElementById("prev-bill").textContent = "$" + (u * RATE).toFixed(2);
+      } else {
+        document.getElementById("prev-usage").textContent = "—";
+        document.getElementById("prev-bill").textContent = "—";
+      }
     }
 
-    const usage = curr - prev;
-    const bill = usage * RATE;
+    function updateMetrics(data) {
+      if (!data || !data.length) return;
+      const last = data[0];
+      document.getElementById("m-usage").textContent = Number(last.usage).toFixed(2);
+      document.getElementById("m-bill").textContent = "$" + Number(last.estimated_bill).toFixed(2);
+      document.getElementById("m-count").textContent = data.length;
+    }
 
-    document.getElementById("usage").innerText = usage.toFixed(2);
-    document.getElementById("bill").innerText = "$" + bill.toFixed(2);
-
-    return {
-      previous_reading: prev,
-      current_reading: curr,
-      usage: usage,
-      estimated_bill: bill,
-      read_date: document.getElementById("readDate").value || null,
-      bill_from: document.getElementById("billFrom").value || null,
-      bill_to: document.getElementById("billTo").value || null
-    };
-  }
-
-  async function initSupabase() {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    setStatus("Supabase connected.");
-  }
-
-  async function loadHistory() {
-    try {
-      setStatus("Loading history...");
-
-      const { data, error } = await supabaseClient
-        .from("meter_history")
-        .select("*")
-        .order("id", { ascending: false });
-
-      if (error) throw error;
-
-      let html = "";
-      (data || []).forEach(item => {
-        html += `
-          <div class="entry">
-            Usage: ${Number(item.usage).toFixed(2)} kWh |
-            Bill: $${Number(item.estimated_bill).toFixed(2)}<br>
-            Read Date: ${item.read_date || "-"}<br>
-            Bill Period: ${item.bill_from || "-"} → ${item.bill_to || "-"}
-          </div>
-        `;
+    function renderChart(data) {
+      const recent = [...data].reverse().slice(-10);
+      const labels = recent.map(d => d.read_date || ("#" + d.id));
+      const vals = recent.map(d => Number(d.usage));
+      const ctx = document.getElementById("usageChart").getContext("2d");
+      if (chartInst) chartInst.destroy();
+      chartInst = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            label: "kWh",
+            data: vals,
+            backgroundColor: "#5DCAA5",
+            borderRadius: 4,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => `${ctx.parsed.y.toFixed(2)} kWh` } }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 11 }, color: "#888780", autoSkip: false, maxRotation: 35 }
+            },
+            y: {
+              grid: { color: "rgba(136,135,128,.15)" },
+              ticks: { font: { size: 11 }, color: "#888780", callback: v => v.toFixed(0) },
+              beginAtZero: true
+            }
+          }
+        }
       });
-
-      document.getElementById("history").innerHTML = html || "No data";
-      setStatus("Ready.");
-    } catch (err) {
-      document.getElementById("history").innerText = "Load failed: " + err.message;
-      setStatus("Load failed: " + err.message);
     }
-  }
 
-  async function saveData() {
-    try {
-      setStatus("Button clicked.");
-      const payload = calculate();
-      setStatus("Calculated. Saving...");
-
-      const { error } = await supabaseClient
-        .from("meter_history")
-        .insert([payload]);
-
-      if (error) throw error;
-
-      document.getElementById("prev").value = payload.current_reading;
-      document.getElementById("curr").value = "";
-
-      setStatus("Saved successfully.");
-      await loadHistory();
-    } catch (err) {
-      alert(err.message);
-      setStatus("Save failed: " + err.message);
-      console.error(err);
+    function renderHistory(data) {
+      const el = document.getElementById("history-list");
+      if (!data || !data.length) { el.innerHTML = '<div class="empty">No readings yet</div>'; return; }
+      el.innerHTML = data.map((item, i) => {
+        const prev = data[i + 1];
+        let trend = "";
+        if (prev) {
+          const diff = Number(item.usage) - Number(prev.usage);
+          trend = diff <= 0
+            ? `<span class="trend-up">↓ ${Math.abs(diff).toFixed(2)}</span>`
+            : `<span class="trend-down">↑ ${diff.toFixed(2)}</span>`;
+        }
+        const period = item.bill_from && item.bill_to
+          ? `${item.bill_from} → ${item.bill_to}`
+          : item.read_date || "No date";
+        return `<div class="history-item">
+          <div>
+            <div class="hi-kwh">${Number(item.usage).toFixed(2)} kWh ${trend}</div>
+            <div class="hi-date">${period}</div>
+          </div>
+          <div class="hi-bill">$${Number(item.estimated_bill).toFixed(2)}</div>
+        </div>`;
+      }).join("");
     }
-  }
 
-  document.addEventListener("DOMContentLoaded", async () => {
-    setStatus("Page loaded.");
-    document.getElementById("saveBtn").addEventListener("click", saveData);
+    async function loadHistory() {
+      try {
+        const { data, error } = await sb.from("meter_history").select("*").order("id", { ascending: false });
+        if (error) throw error;
+        allData = data || [];
+        updateMetrics(allData);
+        renderChart(allData);
+        renderHistory(allData);
+        setStatus("Ready");
+      } catch (e) {
+        document.getElementById("history-list").innerHTML = '<div class="empty">Could not load history</div>';
+        setStatus("Load failed: " + e.message);
+      }
+    }
 
-    await initSupabase();
-    await loadHistory();
-  });
-</script>
+    async function saveData() {
+      try {
+        const prev = parseFloat(document.getElementById("prev").value);
+        const curr = parseFloat(document.getElementById("curr").value);
+        if (isNaN(prev) || isNaN(curr)) throw new Error("Enter both readings.");
+        if (curr <= prev) throw new Error("Current must exceed previous.");
+        const usage = curr - prev;
+        const payload = {
+          previous_reading: prev, current_reading: curr,
+          usage, estimated_bill: usage * RATE,
+          read_date: document.getElementById("readDate").value || null,
+          bill_from: document.getElementById("billFrom").value || null,
+          bill_to: document.getElementById("billTo").value || null
+        };
+        document.getElementById("saveBtn").disabled = true;
+        setStatus("Saving…");
+        const { error } = await sb.from("meter_history").insert([payload]);
+        if (error) throw error;
+        document.getElementById("prev").value = curr;
+        document.getElementById("curr").value = "";
+        liveCalc();
+        setStatus("Saved");
+        await loadHistory();
+      } catch (e) {
+        setStatus(e.message);
+      } finally {
+        document.getElementById("saveBtn").disabled = false;
+      }
+    }
+
+    (async () => {
+      try {
+        sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        setPill("connected", true);
+        await loadHistory();
+      } catch (e) {
+        setPill("offline", false);
+        setStatus("Connection failed");
+      }
+    })();
+  </script>
 </body>
 </html>
