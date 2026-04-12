@@ -176,30 +176,32 @@
     }
 
     async function saveData() {
-      try {
-        setStatus("Button clicked.");
-        const payload = calculate();
-        setStatus("Calculated. Saving...");
+  try {
+    setStatus("Button clicked.");
+    const payload = calculate();
+    setStatus("Calculated. Saving...");
 
-        if (!supabaseClient) {
-          throw new Error("Supabase not initialized.");
-        }
-
-        const { error } = await supabaseClient
-          .from("meter_history")
-          .insert([payload]);
-
-        if (error) throw error;
-
-        setStatus("Saved successfully.");
-        await loadHistory();
-      } catch (err) {
-        alert(err.message);
-        setStatus("Save failed: " + err.message);
-        console.error(err);
-      }
+    if (!supabaseClient) {
+      throw new Error("Supabase not initialized.");
     }
 
+    const { error } = await supabaseClient
+      .from("meter_history")
+      .insert([payload]);
+
+    if (error) throw error;
+
+    document.getElementById("prev").value = payload.current_reading;
+    document.getElementById("curr").value = "";
+
+    setStatus("Saved successfully.");
+    await loadHistory();
+  } catch (err) {
+    alert(err.message);
+    setStatus("Save failed: " + err.message);
+    console.error(err);
+  }
+}
     document.addEventListener("DOMContentLoaded", async () => {
       setStatus("Page loaded.");
       document.getElementById("saveBtn").addEventListener("click", saveData);
