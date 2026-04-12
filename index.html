@@ -127,24 +127,33 @@
       };
     }
 
-    async function initSupabase() {
-      try {
-        if (!window.supabase || !window.supabase.createClient) {
-          throw new Error("Supabase library failed to load.");
-        }
+    async function saveData() {
+  try {
+    setStatus("Button clicked.");
+    const payload = calculate();
+    setStatus("Calculated. Saving...");
 
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        setStatus("Supabase connected.");
-      } catch (err) {
-        setStatus("Init failed: " + err.message);
-      }
+    if (!supabaseClient) {
+      throw new Error("Supabase not initialized.");
     }
 
-    async function loadHistory() {
-      if (!supabaseClient) {
-        document.getElementById("history").innerText = "Supabase not connected.";
-        return;
-      }
+    const { error } = await supabaseClient
+      .from("meter_history")
+      .insert([payload]);
+
+    if (error) throw error;
+
+    document.getElementById("prev").value = payload.current_reading;
+    document.getElementById("curr").value = "";
+
+    setStatus("Saved successfully.");
+    await loadHistory();
+  } catch (err) {
+    alert(err.message);
+    setStatus("Save failed: " + err.message);
+    console.error(err);
+  }
+}
 
       try {
         setStatus("Loading history...");
