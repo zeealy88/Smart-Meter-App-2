@@ -320,7 +320,8 @@
             <div style="min-width:28px;height:28px;border-radius:50%;background:#f0f0ec;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#888;">${readingNum}</div>
             <div>
               <div class="hi-kwh">${Number(item.usage).toFixed(2)} kWh ${trend}</div>
-              <div class="hi-date">${period}</div>
+              <div class="hi-date" style="margin-top:2px">${period}</div>
+              <div style="font-size:11px;color:#aaa;margin-top:2px">${Number(item.previous_reading).toFixed(3)} → ${Number(item.current_reading).toFixed(3)}</div>
             </div>
           </div>
           <div class="hi-bill">$${Number(item.estimated_bill).toFixed(2)}</div>
