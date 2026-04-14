@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,9 +10,10 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f0;
-      color: #1a1a1a;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      background: linear-gradient(145deg, #0a1628 0%, #0d2247 40%, #0a1e3d 70%, #12133a 100%);
+      min-height: 100vh;
+      color: #fff;
       padding: 1.5rem 1rem 3rem;
     }
 
@@ -25,45 +25,67 @@
       justify-content: space-between;
       margin-bottom: 1.5rem;
     }
-    .topbar h1 { font-size: 20px; font-weight: 600; }
+    .topbar h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -.4px;
+      background: linear-gradient(135deg, #fff 0%, #a8d4ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
     .pill {
       font-size: 11px;
-      padding: 3px 10px;
+      padding: 4px 12px;
       border-radius: 100px;
-      background: #E1F5EE;
-      color: #085041;
-      font-weight: 500;
+      background: linear-gradient(135deg, rgba(0,212,255,.25), rgba(0,122,255,.25));
+      border: 1px solid rgba(0,212,255,.4);
+      color: #7dd9ff;
+      font-weight: 600;
+      letter-spacing: .02em;
+      backdrop-filter: blur(8px);
     }
 
     .metrics {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-bottom: 1rem;
+      margin-bottom: 12px;
     }
     .metric {
-      background: #fff;
-      border: 1px solid #e8e8e4;
-      border-radius: 12px;
+      background: linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
       padding: 14px 12px;
+      backdrop-filter: blur(16px);
     }
-    .metric-label { font-size: 11px; color: #888; margin-bottom: 5px; letter-spacing: .03em; }
-    .metric-val { font-size: 22px; font-weight: 600; color: #1a1a1a; line-height: 1; }
-    .metric-unit { font-size: 11px; color: #888; margin-top: 3px; }
-    .metric.green .metric-val { color: #0F6E56; }
+    .metric.blue {
+      background: linear-gradient(145deg, rgba(0,122,255,.22), rgba(0,212,255,.10));
+      border-color: rgba(0,180,255,.3);
+    }
+    .metric-label { font-size: 11px; color: rgba(255,255,255,.45); margin-bottom: 6px; letter-spacing: .04em; text-transform: uppercase; }
+    .metric-val { font-size: 22px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -.5px; }
+    .metric.blue .metric-val {
+      background: linear-gradient(135deg, #60cfff, #007aff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .metric-unit { font-size: 11px; color: rgba(255,255,255,.35); margin-top: 3px; }
 
     .card {
-      background: #fff;
-      border: 1px solid #e8e8e4;
-      border-radius: 12px;
+      background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 20px;
       padding: 1.25rem;
-      margin-bottom: 1rem;
+      margin-bottom: 12px;
+      backdrop-filter: blur(20px);
     }
     .section-label {
       font-size: 11px;
       font-weight: 600;
-      color: #888;
-      letter-spacing: .06em;
+      color: rgba(255,255,255,.4);
+      letter-spacing: .08em;
       text-transform: uppercase;
       margin-bottom: 1rem;
     }
@@ -72,24 +94,32 @@
 
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .field { margin-top: 10px; }
-    .field label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+    .field label { display: block; font-size: 12px; color: rgba(255,255,255,.5); margin-bottom: 4px; font-weight: 500; }
     .field input {
       width: 100%;
-      padding: 9px 10px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 10px;
       font-size: 14px;
-      background: #fff;
-      color: #1a1a1a;
+      background: rgba(255,255,255,.07);
+      color: #fff;
       outline: none;
-      transition: border-color .15s, box-shadow .15s;
+      transition: border-color .2s, box-shadow .2s;
+      font-family: inherit;
     }
+    .field input::placeholder { color: rgba(255,255,255,.25); }
     .field input:focus {
-      border-color: #1D9E75;
-      box-shadow: 0 0 0 3px rgba(29,158,117,.1);
+      border-color: rgba(0,180,255,.6);
+      box-shadow: 0 0 0 3px rgba(0,122,255,.2);
+      background: rgba(255,255,255,.1);
     }
+    .field input::-webkit-calendar-picker-indicator { filter: invert(1) opacity(.4); }
 
-    .divider { height: 1px; background: #f0f0ec; margin: 1rem 0; }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+      margin: 1rem 0;
+    }
 
     .preview-row {
       display: flex;
@@ -97,57 +127,96 @@
       align-items: baseline;
       margin-bottom: 12px;
       font-size: 13px;
-      color: #888;
+      color: rgba(255,255,255,.45);
     }
-    .preview-row strong { color: #1a1a1a; }
-    .preview-row .green { color: #0F6E56; }
+    .preview-row strong { color: #fff; }
+    .preview-row .blue {
+      background: linear-gradient(135deg, #60cfff, #007aff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
 
     .save-btn {
       width: 100%;
-      padding: 11px;
-      background: #1D9E75;
+      padding: 13px;
+      background: linear-gradient(135deg, #0a84ff, #007aff 50%, #5856d6);
       color: #fff;
       border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
       cursor: pointer;
-      transition: opacity .15s, transform .1s;
+      letter-spacing: -.1px;
+      transition: opacity .15s, transform .1s, box-shadow .2s;
+      box-shadow: 0 4px 20px rgba(0,122,255,.4);
+      font-family: inherit;
     }
-    .save-btn:hover { opacity: .88; }
+    .save-btn:hover { opacity: .9; box-shadow: 0 6px 28px rgba(0,122,255,.55); }
     .save-btn:active { transform: scale(0.98); }
-    .save-btn:disabled { opacity: .45; cursor: default; }
+    .save-btn:disabled { opacity: .35; cursor: default; box-shadow: none; }
 
-    .status {
-      font-size: 12px;
-      color: #888;
-      text-align: center;
-      margin-top: 10px;
-      min-height: 18px;
-    }
+    .status { font-size: 12px; color: rgba(255,255,255,.4); text-align: center; margin-top: 10px; min-height: 18px; }
 
     .history-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 11px 0;
-      border-bottom: 1px solid #f0f0ec;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,.07);
     }
     .history-item:last-child { border-bottom: none; }
-    .hi-kwh { font-size: 14px; font-weight: 600; color: #1a1a1a; }
-    .hi-date { font-size: 12px; color: #888; margin-top: 2px; }
-    .hi-bill { font-size: 15px; font-weight: 600; color: #0F6E56; }
-    .trend-up { color: #0F6E56; font-size: 11px; margin-left: 4px; }
-    .trend-down { color: #c0392b; font-size: 11px; margin-left: 4px; }
-    .empty { font-size: 13px; color: #888; padding: 1rem 0; text-align: center; }
+    .hi-kwh { font-size: 14px; font-weight: 600; color: #fff; }
+    .hi-date { font-size: 12px; color: rgba(255,255,255,.4); margin-top: 2px; }
+    .hi-bill {
+      font-size: 15px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #60cfff, #0a84ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .trend-up { color: #30d158; font-size: 11px; margin-left: 4px; }
+    .trend-down { color: #ff453a; font-size: 11px; margin-left: 4px; }
+    .empty { font-size: 13px; color: rgba(255,255,255,.35); padding: 1rem 0; text-align: center; }
+
+    .hero-bar {
+      background: linear-gradient(135deg, rgba(0,122,255,.15), rgba(88,86,214,.15));
+      border: 1px solid rgba(88,86,214,.25);
+      border-radius: 20px;
+      padding: 1.1rem 1.25rem;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .hero-icon {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0a84ff, #5856d6);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+    }
+    .hero-text-main { font-size: 14px; font-weight: 600; color: #fff; }
+    .hero-text-sub { font-size: 12px; color: rgba(255,255,255,.45); margin-top: 2px; }
   </style>
 </head>
 <body>
   <div class="app">
 
     <div class="topbar">
-      <h1>Smart meter</h1>
+      <h1>Smart Meter</h1>
       <span class="pill" id="conn-pill">connecting…</span>
+    </div>
+
+    <div class="hero-bar">
+      <div class="hero-icon">⚡</div>
+      <div>
+        <div class="hero-text-main">Energy Dashboard</div>
+        <div class="hero-text-sub">Track usage, estimate bills in real time</div>
+      </div>
     </div>
 
     <div class="metrics">
@@ -156,13 +225,13 @@
         <div class="metric-val" id="m-usage">—</div>
         <div class="metric-unit">kWh</div>
       </div>
-      <div class="metric green">
+      <div class="metric blue">
         <div class="metric-label">Last bill</div>
         <div class="metric-val" id="m-bill">—</div>
         <div class="metric-unit">estimated</div>
       </div>
       <div class="metric">
-        <div class="metric-label">Total readings</div>
+        <div class="metric-label">Readings</div>
         <div class="metric-val" id="m-count">—</div>
         <div class="metric-unit">recorded</div>
       </div>
@@ -171,7 +240,7 @@
     <div class="card">
       <div class="section-label">Usage over time</div>
       <div class="chart-wrap">
-        <canvas id="usageChart" role="img" aria-label="Bar chart of recent meter usage in kWh">No chart data yet.</canvas>
+        <canvas id="usageChart" role="img" aria-label="Bar chart of recent meter usage in kWh"></canvas>
       </div>
     </div>
 
@@ -208,11 +277,11 @@
         <span>Preview</span>
         <span>
           Usage: <strong id="prev-usage">—</strong> kWh &nbsp;|&nbsp;
-          Est. bill: <strong class="green" id="prev-bill">—</strong>
+          Est. bill: <strong class="blue" id="prev-bill">—</strong>
         </span>
       </div>
 
-      <button class="save-btn" id="saveBtn" onclick="saveData()">Save reading</button>
+      <button class="save-btn" id="saveBtn" onclick="saveData()">Save Reading</button>
       <div class="status" id="status">Enter readings above</div>
     </div>
 
@@ -234,8 +303,11 @@
     function setPill(txt, ok) {
       const p = document.getElementById("conn-pill");
       p.textContent = txt;
-      p.style.background = ok ? "#E1F5EE" : "#FAEEDA";
-      p.style.color = ok ? "#085041" : "#633806";
+      p.style.background = ok
+        ? "linear-gradient(135deg, rgba(0,212,255,.25), rgba(0,122,255,.25))"
+        : "linear-gradient(135deg, rgba(255,159,10,.25), rgba(255,69,58,.15))";
+      p.style.color = ok ? "#7dd9ff" : "#ffd60a";
+      p.style.borderColor = ok ? "rgba(0,212,255,.4)" : "rgba(255,159,10,.4)";
     }
 
     function liveCalc() {
@@ -265,35 +337,36 @@
       const vals = recent.map(d => Number(d.usage));
       const ctx = document.getElementById("usageChart").getContext("2d");
       if (chartInst) chartInst.destroy();
+      const grad = ctx.createLinearGradient(0, 0, 0, 140);
+      grad.addColorStop(0, "rgba(96,207,255,0.85)");
+      grad.addColorStop(1, "rgba(88,86,214,0.5)");
       chartInst = new Chart(ctx, {
         type: "bar",
         data: {
           labels,
           datasets: [{
-            label: "kWh",
-            data: vals,
-            backgroundColor: "#5DCAA5",
-            borderRadius: 4,
+            label: "kWh", data: vals,
+            backgroundColor: grad,
+            borderRadius: 6,
             borderSkipped: false
           }]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
-            tooltip: { callbacks: { label: ctx => `${ctx.parsed.y.toFixed(2)} kWh` } }
+            tooltip: {
+              callbacks: { label: c => `${c.parsed.y.toFixed(2)} kWh` },
+              backgroundColor: "rgba(10,20,50,.85)",
+              borderColor: "rgba(0,180,255,.3)",
+              borderWidth: 1,
+              titleColor: "#fff",
+              bodyColor: "rgba(255,255,255,.7)"
+            }
           },
           scales: {
-            x: {
-              grid: { display: false },
-              ticks: { font: { size: 11 }, color: "#888780", autoSkip: false, maxRotation: 35 }
-            },
-            y: {
-              grid: { color: "rgba(136,135,128,.15)" },
-              ticks: { font: { size: 11 }, color: "#888780", callback: v => v.toFixed(0) },
-              beginAtZero: true
-            }
+            x: { grid: { display: false }, ticks: { font: { size: 11 }, color: "rgba(255,255,255,.35)", autoSkip: false, maxRotation: 35 } },
+            y: { grid: { color: "rgba(255,255,255,.06)" }, ticks: { font: { size: 11 }, color: "rgba(255,255,255,.35)", callback: v => v.toFixed(0) }, beginAtZero: true }
           }
         }
       });
@@ -317,11 +390,11 @@
         const readingNum = data.length - i;
         return `<div class="history-item">
           <div style="display:flex;align-items:center;gap:10px">
-            <div style="min-width:28px;height:28px;border-radius:50%;background:#f0f0ec;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#888;">${readingNum}</div>
+            <div style="min-width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0a84ff,#5856d6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">${readingNum}</div>
             <div>
               <div class="hi-kwh">${Number(item.usage).toFixed(2)} kWh ${trend}</div>
-              <div class="hi-date" style="margin-top:2px">${period}</div>
-              <div style="font-size:11px;color:#aaa;margin-top:2px">${Number(item.previous_reading).toFixed(3)} → ${Number(item.current_reading).toFixed(3)}</div>
+              <div class="hi-date">${period}</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:2px">${Number(item.previous_reading).toFixed(3)} → ${Number(item.current_reading).toFixed(3)}</div>
             </div>
           </div>
           <div class="hi-bill">$${Number(item.estimated_bill).toFixed(2)}</div>
@@ -334,9 +407,7 @@
         const { data, error } = await sb.from("meter_history").select("*").order("id", { ascending: false });
         if (error) throw error;
         allData = data || [];
-        updateMetrics(allData);
-        renderChart(allData);
-        renderHistory(allData);
+        updateMetrics(allData); renderChart(allData); renderHistory(allData);
         setStatus("Ready");
       } catch (e) {
         document.getElementById("history-list").innerHTML = '<div class="empty">Could not load history</div>';
@@ -364,8 +435,7 @@
         if (error) throw error;
         document.getElementById("prev").value = curr;
         document.getElementById("curr").value = "";
-        liveCalc();
-        setStatus("Saved");
+        liveCalc(); setStatus("Saved ✓");
         await loadHistory();
       } catch (e) {
         setStatus(e.message);
@@ -387,4 +457,3 @@
   </script>
 </body>
 </html>
-```
