@@ -8,452 +8,364 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
       background: linear-gradient(145deg, #0a1628 0%, #0d2247 40%, #0a1e3d 70%, #12133a 100%);
-      min-height: 100vh;
-      color: #fff;
-      padding: 1.5rem 1rem 3rem;
+      min-height: 100vh; color: #fff; padding: 1.5rem 1rem 3rem;
     }
-
     .app { max-width: 520px; margin: 0 auto; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+    .topbar h1 { font-size:22px; font-weight:700; letter-spacing:-.4px; background:linear-gradient(135deg,#fff 0%,#a8d4ff 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .pill { font-size:11px; padding:4px 12px; border-radius:100px; background:linear-gradient(135deg,rgba(0,212,255,.25),rgba(0,122,255,.25)); border:1px solid rgba(0,212,255,.4); color:#7dd9ff; font-weight:600; }
 
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
-    .topbar h1 {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: -.4px;
-      background: linear-gradient(135deg, #fff 0%, #a8d4ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .pill {
-      font-size: 11px;
-      padding: 4px 12px;
-      border-radius: 100px;
-      background: linear-gradient(135deg, rgba(0,212,255,.25), rgba(0,122,255,.25));
-      border: 1px solid rgba(0,212,255,.4);
-      color: #7dd9ff;
-      font-weight: 600;
-      letter-spacing: .02em;
-      backdrop-filter: blur(8px);
-    }
+    .hero-bar { background:linear-gradient(135deg,rgba(0,122,255,.15),rgba(88,86,214,.15)); border:1px solid rgba(88,86,214,.25); border-radius:20px; padding:1.1rem 1.25rem; margin-bottom:12px; display:flex; align-items:center; gap:14px; }
+    .hero-icon { width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#0a84ff,#5856d6); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:18px; }
+    .hero-text-main { font-size:14px; font-weight:600; color:#fff; }
+    .hero-text-sub { font-size:12px; color:rgba(255,255,255,.45); margin-top:2px; }
 
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .metric {
-      background: linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 16px;
-      padding: 14px 12px;
-      backdrop-filter: blur(16px);
-    }
-    .metric.blue {
-      background: linear-gradient(145deg, rgba(0,122,255,.22), rgba(0,212,255,.10));
-      border-color: rgba(0,180,255,.3);
-    }
-    .metric-label { font-size: 11px; color: rgba(255,255,255,.45); margin-bottom: 6px; letter-spacing: .04em; text-transform: uppercase; }
-    .metric-val { font-size: 22px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -.5px; }
-    .metric.blue .metric-val {
-      background: linear-gradient(135deg, #60cfff, #007aff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .metric-unit { font-size: 11px; color: rgba(255,255,255,.35); margin-top: 3px; }
+    /* DAILY CARD */
+    .daily-card { background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.04)); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:1.25rem; margin-bottom:12px; }
+    .daily-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px; }
+    .daily-date { font-size:11px; color:rgba(255,255,255,.4); letter-spacing:.06em; text-transform:uppercase; margin-bottom:4px; }
+    .kwh-big { font-size:46px; font-weight:700; line-height:1; letter-spacing:-1.5px; color:#fff; }
+    .kwh-unit { font-size:16px; color:rgba(255,255,255,.45); margin-left:4px; }
+    .vs-badge { font-size:12px; padding:5px 11px; border-radius:100px; font-weight:600; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; margin-top:6px; }
+    .vs-badge.up { background:rgba(255,69,58,.18); color:#ff6b6b; border:1px solid rgba(255,69,58,.3); }
+    .vs-badge.down { background:rgba(48,209,88,.15); color:#30d158; border:1px solid rgba(48,209,88,.3); }
+    .vs-badge.same { background:rgba(255,255,255,.08); color:rgba(255,255,255,.5); border:1px solid rgba(255,255,255,.15); }
+    .daily-metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+    .dm { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px 12px; }
+    .dm-label { font-size:10px; color:rgba(255,255,255,.4); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+    .dm-val { font-size:17px; font-weight:600; color:#fff; }
+    .dm-val.green { background:linear-gradient(135deg,#60cfff,#0a84ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .dm-val.red { color:#ff6b6b; }
+    .dm-val.lime { color:#30d158; }
+    .bar-row { margin-bottom:8px; }
+    .bar-meta { display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,.4); margin-bottom:4px; }
+    .bar-track { height:5px; background:rgba(255,255,255,.1); border-radius:3px; overflow:hidden; }
+    .bar-fill-today { height:100%; border-radius:3px; background:linear-gradient(90deg,#0a84ff,#60cfff); transition:width .7s ease; }
+    .bar-fill-yest { height:100%; border-radius:3px; background:rgba(255,255,255,.25); transition:width .7s ease; }
+    .daily-footer { display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid rgba(255,255,255,.07); font-size:13px; margin-top:4px; }
+    .daily-footer span:first-child { color:rgba(255,255,255,.4); }
+    .daily-footer span:last-child { font-weight:600; }
 
-    .card {
-      background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 20px;
-      padding: 1.25rem;
-      margin-bottom: 12px;
-      backdrop-filter: blur(20px);
-    }
-    .section-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: rgba(255,255,255,.4);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      margin-bottom: 1rem;
-    }
+    .metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px; }
+    .metric { background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.04)); border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:14px 12px; }
+    .metric.blue { background:linear-gradient(145deg,rgba(0,122,255,.22),rgba(0,212,255,.10)); border-color:rgba(0,180,255,.3); }
+    .metric-label { font-size:11px; color:rgba(255,255,255,.45); margin-bottom:6px; letter-spacing:.04em; text-transform:uppercase; }
+    .metric-val { font-size:22px; font-weight:700; color:#fff; line-height:1; letter-spacing:-.5px; }
+    .metric.blue .metric-val { background:linear-gradient(135deg,#60cfff,#007aff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .metric-unit { font-size:11px; color:rgba(255,255,255,.35); margin-top:3px; }
 
-    .chart-wrap { position: relative; width: 100%; height: 140px; margin-bottom: .5rem; }
-
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .field { margin-top: 10px; }
-    .field label { display: block; font-size: 12px; color: rgba(255,255,255,.5); margin-bottom: 4px; font-weight: 500; }
-    .field input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid rgba(255,255,255,.15);
-      border-radius: 10px;
-      font-size: 14px;
-      background: rgba(255,255,255,.07);
-      color: #fff;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-      font-family: inherit;
-    }
-    .field input::placeholder { color: rgba(255,255,255,.25); }
-    .field input:focus {
-      border-color: rgba(0,180,255,.6);
-      box-shadow: 0 0 0 3px rgba(0,122,255,.2);
-      background: rgba(255,255,255,.1);
-    }
-    .field input::-webkit-calendar-picker-indicator { filter: invert(1) opacity(.4); }
-
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
-      margin: 1rem 0;
-    }
-
-    .preview-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 12px;
-      font-size: 13px;
-      color: rgba(255,255,255,.45);
-    }
-    .preview-row strong { color: #fff; }
-    .preview-row .blue {
-      background: linear-gradient(135deg, #60cfff, #007aff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-weight: 700;
-    }
-
-    .save-btn {
-      width: 100%;
-      padding: 13px;
-      background: linear-gradient(135deg, #0a84ff, #007aff 50%, #5856d6);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: -.1px;
-      transition: opacity .15s, transform .1s, box-shadow .2s;
-      box-shadow: 0 4px 20px rgba(0,122,255,.4);
-      font-family: inherit;
-    }
-    .save-btn:hover { opacity: .9; box-shadow: 0 6px 28px rgba(0,122,255,.55); }
-    .save-btn:active { transform: scale(0.98); }
-    .save-btn:disabled { opacity: .35; cursor: default; box-shadow: none; }
-
-    .status { font-size: 12px; color: rgba(255,255,255,.4); text-align: center; margin-top: 10px; min-height: 18px; }
-
-    .history-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(255,255,255,.07);
-    }
-    .history-item:last-child { border-bottom: none; }
-    .hi-kwh { font-size: 14px; font-weight: 600; color: #fff; }
-    .hi-date { font-size: 12px; color: rgba(255,255,255,.4); margin-top: 2px; }
-    .hi-bill {
-      font-size: 15px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #60cfff, #0a84ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .trend-up { color: #30d158; font-size: 11px; margin-left: 4px; }
-    .trend-down { color: #ff453a; font-size: 11px; margin-left: 4px; }
-    .empty { font-size: 13px; color: rgba(255,255,255,.35); padding: 1rem 0; text-align: center; }
-
-    .hero-bar {
-      background: linear-gradient(135deg, rgba(0,122,255,.15), rgba(88,86,214,.15));
-      border: 1px solid rgba(88,86,214,.25);
-      border-radius: 20px;
-      padding: 1.1rem 1.25rem;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .hero-icon {
-      width: 40px; height: 40px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #0a84ff, #5856d6);
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      font-size: 18px;
-    }
-    .hero-text-main { font-size: 14px; font-weight: 600; color: #fff; }
-    .hero-text-sub { font-size: 12px; color: rgba(255,255,255,.45); margin-top: 2px; }
+    .card { background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.04)); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:1.25rem; margin-bottom:12px; }
+    .section-label { font-size:11px; font-weight:600; color:rgba(255,255,255,.4); letter-spacing:.08em; text-transform:uppercase; margin-bottom:1rem; }
+    .chart-wrap { position:relative; width:100%; height:140px; margin-bottom:.5rem; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .field { margin-top:10px; }
+    .field label { display:block; font-size:12px; color:rgba(255,255,255,.5); margin-bottom:4px; font-weight:500; }
+    .field input { width:100%; padding:10px 12px; border:1px solid rgba(255,255,255,.15); border-radius:10px; font-size:14px; background:rgba(255,255,255,.07); color:#fff; outline:none; transition:border-color .2s,box-shadow .2s; font-family:inherit; }
+    .field input::placeholder { color:rgba(255,255,255,.25); }
+    .field input:focus { border-color:rgba(0,180,255,.6); box-shadow:0 0 0 3px rgba(0,122,255,.2); background:rgba(255,255,255,.1); }
+    .field input::-webkit-calendar-picker-indicator { filter:invert(1) opacity(.4); }
+    .divider { height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent); margin:1rem 0; }
+    .preview-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; font-size:13px; color:rgba(255,255,255,.45); }
+    .preview-row strong { color:#fff; }
+    .preview-row .blue { background:linear-gradient(135deg,#60cfff,#007aff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-weight:700; }
+    .save-btn { width:100%; padding:13px; background:linear-gradient(135deg,#0a84ff,#007aff 50%,#5856d6); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; transition:opacity .15s,transform .1s,box-shadow .2s; box-shadow:0 4px 20px rgba(0,122,255,.4); font-family:inherit; }
+    .save-btn:hover { opacity:.9; box-shadow:0 6px 28px rgba(0,122,255,.55); }
+    .save-btn:active { transform:scale(0.98); }
+    .save-btn:disabled { opacity:.35; cursor:default; box-shadow:none; }
+    .status { font-size:12px; color:rgba(255,255,255,.4); text-align:center; margin-top:10px; min-height:18px; }
+    .history-item { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.07); }
+    .history-item:last-child { border-bottom:none; }
+    .hi-kwh { font-size:14px; font-weight:600; color:#fff; }
+    .hi-date { font-size:12px; color:rgba(255,255,255,.4); margin-top:2px; }
+    .hi-bill { font-size:15px; font-weight:700; background:linear-gradient(135deg,#60cfff,#0a84ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .trend-up { color:#30d158; font-size:11px; margin-left:4px; }
+    .trend-down { color:#ff453a; font-size:11px; margin-left:4px; }
+    .empty { font-size:13px; color:rgba(255,255,255,.35); padding:1rem 0; text-align:center; }
   </style>
 </head>
 <body>
-  <div class="app">
+<div class="app">
 
-    <div class="topbar">
-      <h1>Smart Meter</h1>
-      <span class="pill" id="conn-pill">connecting…</span>
-    </div>
-
-    <div class="hero-bar">
-      <div class="hero-icon">⚡</div>
-      <div>
-        <div class="hero-text-main">Energy Dashboard</div>
-        <div class="hero-text-sub">Track usage, estimate bills in real time</div>
-      </div>
-    </div>
-
-    <div class="metrics">
-      <div class="metric">
-        <div class="metric-label">Last usage</div>
-        <div class="metric-val" id="m-usage">—</div>
-        <div class="metric-unit">kWh</div>
-      </div>
-      <div class="metric blue">
-        <div class="metric-label">Last bill</div>
-        <div class="metric-val" id="m-bill">—</div>
-        <div class="metric-unit">estimated</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">Readings</div>
-        <div class="metric-val" id="m-count">—</div>
-        <div class="metric-unit">recorded</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-label">Usage over time</div>
-      <div class="chart-wrap">
-        <canvas id="usageChart" role="img" aria-label="Bar chart of recent meter usage in kWh"></canvas>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-label">New reading</div>
-      <div class="grid2">
-        <div class="field">
-          <label>Previous reading</label>
-          <input id="prev" type="number" step="0.001" placeholder="0.000" oninput="liveCalc()">
-        </div>
-        <div class="field">
-          <label>Current reading</label>
-          <input id="curr" type="number" step="0.001" placeholder="0.000" oninput="liveCalc()">
-        </div>
-      </div>
-      <div class="field">
-        <label>Meter read date</label>
-        <input id="readDate" type="date">
-      </div>
-      <div class="grid2">
-        <div class="field">
-          <label>Bill period start</label>
-          <input id="billFrom" type="date">
-        </div>
-        <div class="field">
-          <label>Bill period end</label>
-          <input id="billTo" type="date">
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="preview-row">
-        <span>Preview</span>
-        <span>
-          Usage: <strong id="prev-usage">—</strong> kWh &nbsp;|&nbsp;
-          Est. bill: <strong class="blue" id="prev-bill">—</strong>
-        </span>
-      </div>
-
-      <button class="save-btn" id="saveBtn" onclick="saveData()">Save Reading</button>
-      <div class="status" id="status">Enter readings above</div>
-    </div>
-
-    <div class="card">
-      <div class="section-label">History</div>
-      <div id="history-list"><div class="empty">Loading…</div></div>
-    </div>
-
+  <div class="topbar">
+    <h1>Smart Meter</h1>
+    <span class="pill" id="conn-pill">connecting…</span>
   </div>
 
-  <script>
-    const SUPABASE_URL = "https://zdhvnoiayjupgwnjrbkg.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_ut0vWantp9acwz4Gov8PNA_TonMYYFW";
-    const RATE = 0.13926;
-    let sb = null, chartInst = null, allData = [];
+  <div class="hero-bar">
+    <div class="hero-icon">⚡</div>
+    <div>
+      <div class="hero-text-main">Energy Dashboard</div>
+      <div class="hero-text-sub">Track usage, estimate bills in real time</div>
+    </div>
+  </div>
 
-    function setStatus(msg) { document.getElementById("status").textContent = msg; }
+  <!-- DAILY CARD -->
+  <div class="daily-card" id="daily-card" style="display:none">
+    <div class="daily-top">
+      <div>
+        <div class="daily-date" id="dc-date">—</div>
+        <div><span class="kwh-big" id="dc-kwh">—</span><span class="kwh-unit">kWh</span></div>
+      </div>
+      <span class="vs-badge same" id="dc-badge">—</span>
+    </div>
+    <div class="daily-metrics">
+      <div class="dm"><div class="dm-label">Est. cost</div><div class="dm-val green" id="dc-cost">—</div></div>
+      <div class="dm"><div class="dm-label">Meter end</div><div class="dm-val" id="dc-meter">—</div></div>
+      <div class="dm"><div class="dm-label">vs yesterday</div><div class="dm-val" id="dc-diff">—</div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-meta"><span>Today</span><span id="dc-bar-today-val">—</span></div>
+      <div class="bar-track"><div class="bar-fill-today" id="dc-bar-today" style="width:0%"></div></div>
+    </div>
+    <div class="bar-row" id="dc-yest-row" style="display:none">
+      <div class="bar-meta"><span>Yesterday</span><span id="dc-bar-yest-val">—</span></div>
+      <div class="bar-track"><div class="bar-fill-yest" id="dc-bar-yest" style="width:0%"></div></div>
+    </div>
+    <div class="daily-footer" id="dc-footer" style="display:none">
+      <span>Change from yesterday</span>
+      <span id="dc-pct">—</span>
+    </div>
+  </div>
 
-    function setPill(txt, ok) {
-      const p = document.getElementById("conn-pill");
-      p.textContent = txt;
-      p.style.background = ok
-        ? "linear-gradient(135deg, rgba(0,212,255,.25), rgba(0,122,255,.25))"
-        : "linear-gradient(135deg, rgba(255,159,10,.25), rgba(255,69,58,.15))";
-      p.style.color = ok ? "#7dd9ff" : "#ffd60a";
-      p.style.borderColor = ok ? "rgba(0,212,255,.4)" : "rgba(255,159,10,.4)";
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Last usage</div><div class="metric-val" id="m-usage">—</div><div class="metric-unit">kWh</div></div>
+    <div class="metric blue"><div class="metric-label">Last bill</div><div class="metric-val" id="m-bill">—</div><div class="metric-unit">estimated</div></div>
+    <div class="metric"><div class="metric-label">Readings</div><div class="metric-val" id="m-count">—</div><div class="metric-unit">recorded</div></div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">Usage over time</div>
+    <div class="chart-wrap"><canvas id="usageChart" role="img" aria-label="Bar chart of recent meter usage in kWh"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">New reading</div>
+    <div class="grid2">
+      <div class="field"><label>Previous reading</label><input id="prev" type="number" step="0.001" placeholder="0.000" oninput="liveCalc()"></div>
+      <div class="field"><label>Current reading</label><input id="curr" type="number" step="0.001" placeholder="0.000" oninput="liveCalc()"></div>
+    </div>
+    <div class="field"><label>Meter read date</label><input id="readDate" type="date"></div>
+    <div class="grid2">
+      <div class="field"><label>Bill period start</label><input id="billFrom" type="date"></div>
+      <div class="field"><label>Bill period end</label><input id="billTo" type="date"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="preview-row">
+      <span>Preview</span>
+      <span>Usage: <strong id="prev-usage">—</strong> kWh &nbsp;|&nbsp; Est. bill: <strong class="blue" id="prev-bill">—</strong></span>
+    </div>
+    <button class="save-btn" id="saveBtn" onclick="saveData()">Save Reading</button>
+    <div class="status" id="status">Enter readings above</div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">History</div>
+    <div id="history-list"><div class="empty">Loading…</div></div>
+  </div>
+
+</div>
+<script>
+  const SUPABASE_URL = "https://zdhvnoiayjupgwnjrbkg.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaHZub2lheWp1cGd3bmpyYmtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MDk3MjIsImV4cCI6MjA5MTQ4NTcyMn0.9iBjicqdI_SzaZkUtFjCVYJ8wPEI2eacEiAnuqcgkqE";
+  const RATE = 0.13926;
+  let sb = null, chartInst = null, allData = [];
+
+  function setStatus(msg) { document.getElementById("status").textContent = msg; }
+  function setPill(txt, ok) {
+    const p = document.getElementById("conn-pill");
+    p.textContent = txt;
+    p.style.background = ok ? "linear-gradient(135deg,rgba(0,212,255,.25),rgba(0,122,255,.25))" : "linear-gradient(135deg,rgba(255,159,10,.25),rgba(255,69,58,.15))";
+    p.style.color = ok ? "#7dd9ff" : "#ffd60a";
+    p.style.borderColor = ok ? "rgba(0,212,255,.4)" : "rgba(255,159,10,.4)";
+  }
+
+  function liveCalc() {
+    const p = parseFloat(document.getElementById("prev").value);
+    const c = parseFloat(document.getElementById("curr").value);
+    if (!isNaN(p) && !isNaN(c) && c > p) {
+      const u = c - p;
+      document.getElementById("prev-usage").textContent = u.toFixed(2);
+      document.getElementById("prev-bill").textContent = "$" + (u * RATE).toFixed(2);
+    } else {
+      document.getElementById("prev-usage").textContent = "—";
+      document.getElementById("prev-bill").textContent = "—";
+    }
+  }
+
+  function fmtDate(d) {
+    if (!d) return "—";
+    const dt = new Date(d + "T00:00:00");
+    return dt.toLocaleDateString("en-US", { weekday:"short", month:"short", day:"numeric", year:"numeric" });
+  }
+
+  function renderDailyCard(data) {
+    if (!data || !data.length) return;
+    const today = data[0];
+    const yesterday = data[1] || null;
+    const todayKwh = Number(today.usage);
+    const yesterKwh = yesterday ? Number(yesterday.usage) : null;
+    const diff = yesterKwh !== null ? todayKwh - yesterKwh : null;
+    const pct = yesterKwh ? ((diff / yesterKwh) * 100) : null;
+
+    document.getElementById("dc-date").textContent = fmtDate(today.read_date) + " · latest";
+    document.getElementById("dc-kwh").textContent = todayKwh.toFixed(2);
+    document.getElementById("dc-cost").textContent = "$" + Number(today.estimated_bill).toFixed(2);
+    document.getElementById("dc-meter").textContent = Number(today.current_reading).toFixed(1);
+    document.getElementById("dc-bar-today-val").textContent = todayKwh.toFixed(2) + " kWh";
+
+    const badge = document.getElementById("dc-badge");
+    const diffEl = document.getElementById("dc-diff");
+    if (diff === null) {
+      badge.className = "vs-badge same"; badge.textContent = "no prior day";
+      diffEl.textContent = "—"; diffEl.className = "dm-val";
+    } else if (diff > 0.01) {
+      badge.className = "vs-badge up"; badge.textContent = "↑ " + diff.toFixed(2) + " kWh more";
+      diffEl.textContent = "+" + diff.toFixed(2); diffEl.className = "dm-val red";
+    } else if (diff < -0.01) {
+      badge.className = "vs-badge down"; badge.textContent = "↓ " + Math.abs(diff).toFixed(2) + " kWh less";
+      diffEl.textContent = diff.toFixed(2); diffEl.className = "dm-val lime";
+    } else {
+      badge.className = "vs-badge same"; badge.textContent = "≈ same as yesterday";
+      diffEl.textContent = "0.00"; diffEl.className = "dm-val";
     }
 
-    function liveCalc() {
-      const p = parseFloat(document.getElementById("prev").value);
-      const c = parseFloat(document.getElementById("curr").value);
-      if (!isNaN(p) && !isNaN(c) && c > p) {
-        const u = c - p;
-        document.getElementById("prev-usage").textContent = u.toFixed(2);
-        document.getElementById("prev-bill").textContent = "$" + (u * RATE).toFixed(2);
-      } else {
-        document.getElementById("prev-usage").textContent = "—";
-        document.getElementById("prev-bill").textContent = "—";
+    const maxKwh = yesterKwh ? Math.max(todayKwh, yesterKwh) : todayKwh;
+    document.getElementById("dc-bar-today").style.width = maxKwh > 0 ? (todayKwh / maxKwh * 100).toFixed(1) + "%" : "100%";
+
+    if (yesterKwh) {
+      document.getElementById("dc-yest-row").style.display = "block";
+      document.getElementById("dc-bar-yest-val").textContent = yesterKwh.toFixed(2) + " kWh";
+      document.getElementById("dc-bar-yest").style.width = maxKwh > 0 ? (yesterKwh / maxKwh * 100).toFixed(1) + "%" : "100%";
+    }
+
+    if (pct !== null) {
+      const footer = document.getElementById("dc-footer");
+      const pctEl = document.getElementById("dc-pct");
+      footer.style.display = "flex";
+      pctEl.textContent = (diff > 0 ? "+" : "") + pct.toFixed(1) + "%";
+      pctEl.style.color = diff > 0 ? "#ff6b6b" : "#30d158";
+    }
+
+    document.getElementById("daily-card").style.display = "block";
+  }
+
+  function updateMetrics(data) {
+    if (!data || !data.length) return;
+    const last = data[0];
+    document.getElementById("m-usage").textContent = Number(last.usage).toFixed(2);
+    document.getElementById("m-bill").textContent = "$" + Number(last.estimated_bill).toFixed(2);
+    document.getElementById("m-count").textContent = data.length;
+  }
+
+  function renderChart(data) {
+    const recent = [...data].reverse().slice(-10);
+    const labels = recent.map(d => d.read_date || ("#" + d.id));
+    const vals = recent.map(d => Number(d.usage));
+    const ctx = document.getElementById("usageChart").getContext("2d");
+    if (chartInst) chartInst.destroy();
+    const grad = ctx.createLinearGradient(0, 0, 0, 140);
+    grad.addColorStop(0, "rgba(96,207,255,0.85)");
+    grad.addColorStop(1, "rgba(88,86,214,0.5)");
+    chartInst = new Chart(ctx, {
+      type: "bar",
+      data: { labels, datasets: [{ label:"kWh", data:vals, backgroundColor:grad, borderRadius:6, borderSkipped:false }] },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins: { legend:{display:false}, tooltip:{ callbacks:{label:c=>`${c.parsed.y.toFixed(2)} kWh`}, backgroundColor:"rgba(10,20,50,.85)", borderColor:"rgba(0,180,255,.3)", borderWidth:1, titleColor:"#fff", bodyColor:"rgba(255,255,255,.7)" } },
+        scales: {
+          x:{ grid:{display:false}, ticks:{font:{size:11},color:"rgba(255,255,255,.35)",autoSkip:false,maxRotation:35} },
+          y:{ grid:{color:"rgba(255,255,255,.06)"}, ticks:{font:{size:11},color:"rgba(255,255,255,.35)",callback:v=>v.toFixed(0)}, beginAtZero:true }
+        }
       }
-    }
+    });
+  }
 
-    function updateMetrics(data) {
-      if (!data || !data.length) return;
-      const last = data[0];
-      document.getElementById("m-usage").textContent = Number(last.usage).toFixed(2);
-      document.getElementById("m-bill").textContent = "$" + Number(last.estimated_bill).toFixed(2);
-      document.getElementById("m-count").textContent = data.length;
-    }
-
-    function renderChart(data) {
-      const recent = [...data].reverse().slice(-10);
-      const labels = recent.map(d => d.read_date || ("#" + d.id));
-      const vals = recent.map(d => Number(d.usage));
-      const ctx = document.getElementById("usageChart").getContext("2d");
-      if (chartInst) chartInst.destroy();
-      const grad = ctx.createLinearGradient(0, 0, 0, 140);
-      grad.addColorStop(0, "rgba(96,207,255,0.85)");
-      grad.addColorStop(1, "rgba(88,86,214,0.5)");
-      chartInst = new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels,
-          datasets: [{
-            label: "kWh", data: vals,
-            backgroundColor: grad,
-            borderRadius: 6,
-            borderSkipped: false
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: { label: c => `${c.parsed.y.toFixed(2)} kWh` },
-              backgroundColor: "rgba(10,20,50,.85)",
-              borderColor: "rgba(0,180,255,.3)",
-              borderWidth: 1,
-              titleColor: "#fff",
-              bodyColor: "rgba(255,255,255,.7)"
-            }
-          },
-          scales: {
-            x: { grid: { display: false }, ticks: { font: { size: 11 }, color: "rgba(255,255,255,.35)", autoSkip: false, maxRotation: 35 } },
-            y: { grid: { color: "rgba(255,255,255,.06)" }, ticks: { font: { size: 11 }, color: "rgba(255,255,255,.35)", callback: v => v.toFixed(0) }, beginAtZero: true }
-          }
-        }
-      });
-    }
-
-    function renderHistory(data) {
-      const el = document.getElementById("history-list");
-      if (!data || !data.length) { el.innerHTML = '<div class="empty">No readings yet</div>'; return; }
-      el.innerHTML = data.map((item, i) => {
-        const prev = data[i + 1];
-        let trend = "";
-        if (prev) {
-          const diff = Number(item.usage) - Number(prev.usage);
-          trend = diff <= 0
-            ? `<span class="trend-up">↓ ${Math.abs(diff).toFixed(2)}</span>`
-            : `<span class="trend-down">↑ ${diff.toFixed(2)}</span>`;
-        }
-        const period = item.bill_from && item.bill_to
-          ? `${item.bill_from} → ${item.bill_to}`
-          : item.read_date || "No date";
-        const readingNum = data.length - i;
-        return `<div class="history-item">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div style="min-width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0a84ff,#5856d6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">${readingNum}</div>
-            <div>
-              <div class="hi-kwh">${Number(item.usage).toFixed(2)} kWh ${trend}</div>
-              <div class="hi-date">${period}</div>
-              <div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:2px">${Number(item.previous_reading).toFixed(3)} → ${Number(item.current_reading).toFixed(3)}</div>
-            </div>
+  function renderHistory(data) {
+    const el = document.getElementById("history-list");
+    if (!data || !data.length) { el.innerHTML = '<div class="empty">No readings yet</div>'; return; }
+    el.innerHTML = data.map((item, i) => {
+      const prev = data[i + 1];
+      let trend = "";
+      if (prev) {
+        const diff = Number(item.usage) - Number(prev.usage);
+        trend = diff <= 0
+          ? `<span class="trend-up">↓ ${Math.abs(diff).toFixed(2)}</span>`
+          : `<span class="trend-down">↑ ${diff.toFixed(2)}</span>`;
+      }
+      const period = item.bill_from && item.bill_to ? `${item.bill_from} → ${item.bill_to}` : item.read_date || "No date";
+      const readingNum = data.length - i;
+      return `<div class="history-item">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="min-width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0a84ff,#5856d6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">${readingNum}</div>
+          <div>
+            <div class="hi-kwh">${Number(item.usage).toFixed(2)} kWh ${trend}</div>
+            <div class="hi-date">${period}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:2px">${Number(item.previous_reading).toFixed(3)} → ${Number(item.current_reading).toFixed(3)}</div>
           </div>
-          <div class="hi-bill">$${Number(item.estimated_bill).toFixed(2)}</div>
-        </div>`;
-      }).join("");
-    }
+        </div>
+        <div class="hi-bill">$${Number(item.estimated_bill).toFixed(2)}</div>
+      </div>`;
+    }).join("");
+  }
 
-    async function loadHistory() {
-      try {
-        const { data, error } = await sb.from("meter_history").select("*").order("id", { ascending: false });
-        if (error) throw error;
-        allData = data || [];
-        updateMetrics(allData); renderChart(allData); renderHistory(allData);
-        setStatus("Ready");
-      } catch (e) {
-        document.getElementById("history-list").innerHTML = '<div class="empty">Could not load history</div>';
-        setStatus("Load failed: " + e.message);
-      }
+  async function loadHistory() {
+    try {
+      const { data, error } = await sb.from("meter_history").select("*").order("id", { ascending: false });
+      if (error) throw error;
+      allData = data || [];
+      renderDailyCard(allData);
+      updateMetrics(allData);
+      renderChart(allData);
+      renderHistory(allData);
+      setStatus("Ready");
+    } catch (e) {
+      document.getElementById("history-list").innerHTML = '<div class="empty">Could not load history</div>';
+      setStatus("Load failed: " + e.message);
     }
+  }
 
-    async function saveData() {
-      try {
-        const prev = parseFloat(document.getElementById("prev").value);
-        const curr = parseFloat(document.getElementById("curr").value);
-        if (isNaN(prev) || isNaN(curr)) throw new Error("Enter both readings.");
-        if (curr <= prev) throw new Error("Current must exceed previous.");
-        const usage = curr - prev;
-        const payload = {
-          previous_reading: prev, current_reading: curr,
-          usage, estimated_bill: usage * RATE,
-          read_date: document.getElementById("readDate").value || null,
-          bill_from: document.getElementById("billFrom").value || null,
-          bill_to: document.getElementById("billTo").value || null
-        };
-        document.getElementById("saveBtn").disabled = true;
-        setStatus("Saving…");
-        const { error } = await sb.from("meter_history").insert([payload]);
-        if (error) throw error;
-        document.getElementById("prev").value = curr;
-        document.getElementById("curr").value = "";
-        liveCalc(); setStatus("Saved ✓");
-        await loadHistory();
-      } catch (e) {
-        setStatus(e.message);
-      } finally {
-        document.getElementById("saveBtn").disabled = false;
-      }
+  async function saveData() {
+    try {
+      const prev = parseFloat(document.getElementById("prev").value);
+      const curr = parseFloat(document.getElementById("curr").value);
+      if (isNaN(prev) || isNaN(curr)) throw new Error("Enter both readings.");
+      if (curr <= prev) throw new Error("Current must exceed previous.");
+      const usage = curr - prev;
+      const payload = {
+        previous_reading: prev, current_reading: curr,
+        usage, estimated_bill: usage * RATE,
+        read_date: document.getElementById("readDate").value || null,
+        bill_from: document.getElementById("billFrom").value || null,
+        bill_to: document.getElementById("billTo").value || null
+      };
+      document.getElementById("saveBtn").disabled = true;
+      setStatus("Saving…");
+      const { error } = await sb.from("meter_history").insert([payload]);
+      if (error) throw error;
+      document.getElementById("prev").value = curr;
+      document.getElementById("curr").value = "";
+      liveCalc(); setStatus("Saved ✓");
+      await loadHistory();
+    } catch (e) {
+      setStatus(e.message);
+    } finally {
+      document.getElementById("saveBtn").disabled = false;
     }
+  }
 
-    (async () => {
-      try {
-        sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        setPill("connected", true);
-        await loadHistory();
-      } catch (e) {
-        setPill("offline", false);
-        setStatus("Connection failed");
-      }
-    })();
-  </script>
+  (async () => {
+    try {
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      setPill("connected", true);
+      await loadHistory();
+    } catch (e) {
+      setPill("offline", false);
+      setStatus("Connection failed");
+    }
+  })();
+</script>
 </body>
 </html>
